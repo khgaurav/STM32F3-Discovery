@@ -46,7 +46,7 @@ int main(void)
 	HAL_UART_Transmit(&UartHandle,&data,0x100,0x1FFFFFF);
 	BSP_LED_Init(LED9);
 	BSP_LED_On(LED9);
-	HAL_UART_Receive(&UartHandle,&data,0x100,0x1FFFFFF);
+	//HAL_UART_Receive(&UartHandle,&data,0x100,0x1FFFFFF);
 
 	for(;;);
 }

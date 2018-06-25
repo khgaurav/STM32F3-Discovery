@@ -22,13 +22,16 @@ int main(void)
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	GPIO_InitStruct.Pull = GPIO_PULLUP;
+	BSP_LED_Init(LED9);
 
 	HAL_GPIO_Init(GPIOE,&GPIO_InitStruct);
 	for(;;)
 	{
 		HAL_GPIO_TogglePin(GPIOE,GPIO_PIN_13);
+		BSP_LED_Toggle(LED10);
 		for ( i = 0; i < 1000000; ++i);//delay
 		HAL_GPIO_TogglePin(GPIOE,GPIO_PIN_13); //set pin 13 low
+		BSP_LED_Toggle(LED9);
 		for ( i = 0; i < 1000000; ++i) ; //delay
 	}
 }

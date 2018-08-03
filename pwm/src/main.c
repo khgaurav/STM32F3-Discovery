@@ -11,15 +11,15 @@ int main(void)
 {
 	PWM_Init();
 
-	TIM_SetCompare1(TIM4,0);
+
 
     while(1)
     {
-    	unsigned char var;
-    	for (var = 0; var < 50; ++var) {     		TIM_SetCompare1(TIM4, var);     		Delay(500000); 		}     	for (var = 50; var > 0; --var) {
-    	    		TIM_SetCompare1(TIM4, var);
-    	    		Delay(50000);
-    	}
+    	unsigned char var=49;
+    	TIM_SetCompare1(TIM1,var);
+
+
+
     }
 }
 
@@ -37,26 +37,26 @@ void PWM_Init(void)
 	TIM_TimeBaseInitTypeDef     TIM_TimeBaseStructure;			//structure for TIM Time Base
 	TIM_OCInitTypeDef			TIM_OCInitStructure;			//structure for TIM Output Compare
 
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);			//enable the AHB Peripheral Clock to use GPIOB
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);		//enable the TIM4 clock
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOE, ENABLE);			//enable the AHB Peripheral Clock to use GPIOB
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);		//enable the TIM1 clock
 
 	/* Pin configuration */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;						GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;						GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource6, GPIO_AF_2);
+	GPIO_Init(GPIOE, &GPIO_InitStructure);
+	GPIO_PinAFConfig(GPIOE, GPIO_PinSource9, GPIO_AF_2);
 
 
 	TIM_TimeBaseStructure.TIM_Prescaler = 71;
 	TIM_TimeBaseStructure.TIM_Period = 49;	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure);
+	TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
 
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OC1Init(TIM4, &TIM_OCInitStructure);
+	TIM_OC1Init(TIM1, &TIM_OCInitStructure);
 
-	TIM_CtrlPWMOutputs(TIM4, ENABLE);							//enable the PWM output
-	TIM_Cmd(TIM4, ENABLE);
+	TIM_CtrlPWMOutputs(TIM1, ENABLE);							//enable the PWM output
+	TIM_Cmd(TIM1, ENABLE);
 }

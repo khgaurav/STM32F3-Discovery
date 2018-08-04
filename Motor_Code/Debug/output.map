@@ -4355,16 +4355,16 @@ OUTPUT(Motor_Code.elf elf32-littlearm)
  .debug_macro   0x0000000000002643      0x1e1 src/main.o
  .debug_macro   0x0000000000002824      0x19d src/system_stm32f30x.o
 
-.debug_line     0x0000000000000000     0x39af
+.debug_line     0x0000000000000000     0x39df
  .debug_line    0x0000000000000000      0x723 StdPeriph_Driver/src/stm32f30x_gpio.o
  .debug_line    0x0000000000000723      0x98a StdPeriph_Driver/src/stm32f30x_rcc.o
  .debug_line    0x00000000000010ad     0x1094 StdPeriph_Driver/src/stm32f30x_tim.o
  .debug_line    0x0000000000002141      0xa11 StdPeriph_Driver/src/stm32f30x_usart.o
- .debug_line    0x0000000000002b52      0x799 src/main.o
- .debug_line    0x00000000000032eb      0x649 src/system_stm32f30x.o
- .debug_line    0x0000000000003934       0x7b startup/startup_stm32f30x.o
+ .debug_line    0x0000000000002b52      0x7c9 src/main.o
+ .debug_line    0x000000000000331b      0x649 src/system_stm32f30x.o
+ .debug_line    0x0000000000003964       0x7b startup/startup_stm32f30x.o
 
-.debug_str      0x0000000000000000    0x59b3c
+.debug_str      0x0000000000000000    0x59b72
  .debug_str     0x0000000000000000    0x53d6a StdPeriph_Driver/src/stm32f30x_gpio.o
                                       0x53eec (size before relaxing)
  .debug_str     0x0000000000053d6a      0xa86 StdPeriph_Driver/src/stm32f30x_rcc.o
@@ -4373,11 +4373,11 @@ OUTPUT(Motor_Code.elf elf32-littlearm)
                                       0x54a9a (size before relaxing)
  .debug_str     0x00000000000555fd      0x810 StdPeriph_Driver/src/stm32f30x_usart.o
                                       0x5457b (size before relaxing)
- .debug_str     0x0000000000055e0d     0x3c17 src/main.o
-                                      0x57cd1 (size before relaxing)
- .debug_str     0x0000000000059a24       0xea src/system_stm32f30x.o
+ .debug_str     0x0000000000055e0d     0x3c4d src/main.o
+                                      0x57cdd (size before relaxing)
+ .debug_str     0x0000000000059a5a       0xea src/system_stm32f30x.o
                                       0x53d66 (size before relaxing)
- .debug_str     0x0000000000059b0e       0x2e startup/startup_stm32f30x.o
+ .debug_str     0x0000000000059b44       0x2e startup/startup_stm32f30x.o
                                          0x58 (size before relaxing)
 
 .comment        0x0000000000000000       0x7e

@@ -15,8 +15,14 @@
 
 int uartreceive()
 {
+	int cnt=0;
 	//Waiting for register to update
-	while(!USART_GetFlagStatus(UART4, USART_FLAG_RXNE));
+	while(!USART_GetFlagStatus(UART4, USART_FLAG_RXNE))
+	{
+		cnt++;
+		if(cnt>20000)
+			break;
+	}
 	return USART_ReceiveData(UART4);
 }
 
@@ -85,7 +91,7 @@ void pwminit()
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_11;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
 
 	GPIO_Init(GPIOE, &GPIO_InitStructure);
@@ -94,7 +100,7 @@ void pwminit()
 	GPIO_PinAFConfig(GPIOE, GPIO_PinSource11, GPIO_AF_2);
 
 	TIM_TimeBaseStructure.TIM_Period = 600;
-	TIM_TimeBaseStructure.TIM_Prescaler = 600-1;
+	TIM_TimeBaseStructure.TIM_Prescaler = 60-1;
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
@@ -230,7 +236,7 @@ void motorcode(long double x, long double y,long double gear)
 
 int main(void)
 {
-	uint32_t x = 0, y = 0, gear = 0;
+	uint32_t x = 0, y = 0, gear = 0, xprev, yprev, gprev, cnt;
 
 	gpioinit();
 	pwminit();
@@ -241,8 +247,11 @@ int main(void)
 
 		{
 			GPIO_SetBits(GPIOE, GPIO_Pin_10);
-			gear=uartreceive()-'0';
 			motorcode(x,y,gear);
+			xprev=x;
+			yprev=y;
+			gprev=gear;
+			gear=uartreceive()-'0';
 			if(uartreceive()=='x')
 					{
 						x=(uartreceive()-'0')*1000+(uartreceive()-'0')*100+(uartreceive()-'0')*10+(uartreceive()-'0');
@@ -277,7 +286,23 @@ int main(void)
 				GPIO_ResetBits(GPIOE,GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10);
 				TIM_SetCompare1(TIM1, 0);
 				TIM_SetCompare2(TIM1, 0);
+				continue;
 
 			}
+		if(xprev == x && yprev == y && gprev == gear)
+		{
+			cnt++;
+			if(cnt>100)
+			{
+				GPIO_ResetBits(GPIOE,GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10);
+				TIM_SetCompare1(TIM1, 0);
+				TIM_SetCompare2(TIM1, 0);
+				continue;
+			}
+		}
+		else
+		{
+			cnt=0;
 		}
 	}
+}

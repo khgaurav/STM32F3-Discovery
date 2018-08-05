@@ -177,11 +177,11 @@ void motorcode(long double x, long double y,long double gear)
 	y = 4999.5 - y;
 
 	//Buffer for X-axis and Y-axis
-	/*if(y/x>=12.8&&y/x<=-12.8)
+	if(y/x>=12.8&&y/x<=-12.8)
 	x=0;
 	if(y/x<=0.390625&&y/x>=-0.390625)
 	y=0;
-	 */
+
 	x=map(x,-4999.5,4999.5,-1.0,1.0);
 	y=map(y,-4999.5,4999.5,-1.0,1.0);
 
@@ -197,29 +197,32 @@ void motorcode(long double x, long double y,long double gear)
 	x=(int)map(xans,-0.991273,0.991273,-499,499);
 	y=(int)map(yans,-0.991273,0.991273,-499,499);
 
+	//Buffer for (0,0)
+	if( x < 40	&&	x > -40 )
+		x=0;
+
+	if( y < 40	&&	y > -40 )
+		y=0;
+
 	if(x>0)
 	{
 		GPIO_SetBits(GPIOE,GPIO_Pin_13);
-
 		TIM_SetCompare1(TIM1, x);
 	}
 	else
 	{
 		GPIO_ResetBits(GPIOE,GPIO_Pin_13);
-
 		TIM_SetCompare1(TIM1, -x);
 	}
 
 	if(y>0)
 	{
 		GPIO_SetBits(GPIOE,GPIO_Pin_12);
-
 		TIM_SetCompare2(TIM1, y);
 	}
 	else
 	{
 		GPIO_ResetBits(GPIOE,GPIO_Pin_12);
-
 		TIM_SetCompare2(TIM1, -y);
 	}
 
@@ -227,8 +230,8 @@ void motorcode(long double x, long double y,long double gear)
 
 int main(void)
 {
-	long double x=0;
-	long double y=0;
+	uint32_t x = 0, y = 0, gear = 0;
+
 	gpioinit();
 	pwminit();
 	UART_Init();
@@ -238,7 +241,7 @@ int main(void)
 
 		{
 			GPIO_SetBits(GPIOE, GPIO_Pin_10);
-			int gear=uartreceive()-'0';
+			gear=uartreceive()-'0';
 			motorcode(x,y,gear);
 			if(uartreceive()=='x')
 					{

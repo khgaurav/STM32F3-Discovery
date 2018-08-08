@@ -137,7 +137,7 @@ void UART_Init()
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
 
 	/* UART configuration */
-	USART_InitStructure.USART_BaudRate = 19200;
+	USART_InitStructure.USART_BaudRate = 9600;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	USART_InitStructure.USART_Parity = USART_Parity_No;
@@ -200,8 +200,14 @@ void motorcode(long double x, long double y,long double gear)
 
 	ellipticalDiscToSquare(x, y, &xans, &yans);
 
+
 	x=(int)map(xans,-0.991273,0.991273,-499,499);
 	y=(int)map(yans,-0.991273,0.991273,-499,499);
+
+	if(x>450)
+			x=499;
+	if(y>450)
+			y=499;
 
 	//Buffer for (0,0)
 	if( x < 40	&&	x > -40 )
@@ -209,7 +215,8 @@ void motorcode(long double x, long double y,long double gear)
 
 	if( y < 40	&&	y > -40 )
 		y=0;
-
+	x*=gear/9;
+	y*=gear/9;
 	if(x>0)
 	{
 		GPIO_SetBits(GPIOE,GPIO_Pin_13);

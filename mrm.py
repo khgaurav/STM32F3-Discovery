@@ -90,7 +90,7 @@ def motorcode():
 	#print(ser.read(),ser.read(),ser.read(),ser.read())
 	print('m'+str(gear)+'x'+x+'y'+y)
 count =0
-ser=serial.Serial('/dev/usb-ttl',9600)
+ser=serial.Serial('/dev/usb-ttl',18000)
 joystick.init()
 pygame.display.init()
 j=joystick.Joystick(0)

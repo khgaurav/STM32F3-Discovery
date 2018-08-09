@@ -99,8 +99,8 @@ void pwminit()
 	GPIO_PinAFConfig(GPIOE, GPIO_PinSource9, GPIO_AF_2);
 	GPIO_PinAFConfig(GPIOE, GPIO_PinSource11, GPIO_AF_2);
 
-	TIM_TimeBaseStructure.TIM_Period = 600;
-	TIM_TimeBaseStructure.TIM_Prescaler = 60-1;
+	TIM_TimeBaseStructure.TIM_Period = 4800-1;
+	TIM_TimeBaseStructure.TIM_Prescaler = 0;
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
@@ -109,7 +109,7 @@ void pwminit()
 
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStructure.TIM_Pulse = 600/1.2;
+	TIM_OCInitStructure.TIM_Pulse = 4799;
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
 
 	TIM_OC1Init(TIM1, &TIM_OCInitStructure);
@@ -137,7 +137,7 @@ void UART_Init()
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
 
 	/* UART configuration */
-	USART_InitStructure.USART_BaudRate = 9600;
+	USART_InitStructure.USART_BaudRate = 19200;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	USART_InitStructure.USART_Parity = USART_Parity_No;
@@ -201,19 +201,19 @@ void motorcode(long double x, long double y,long double gear)
 	ellipticalDiscToSquare(x, y, &xans, &yans);
 
 
-	x=(int)map(xans,-0.991273,0.991273,-499,499);
-	y=(int)map(yans,-0.991273,0.991273,-499,499);
+	x=(int)map(xans,-0.991273,0.991273,-4799,4799);
+	y=(int)map(yans,-0.991273,0.991273,-4799,4799);
 
-	if(x>450)
-			x=499;
-	if(y>450)
-			y=499;
+	if(x>4500)
+			x=4799;
+	if(y>4500)
+			y=4799;
 
 	//Buffer for (0,0)
-	if( x < 40	&&	x > -40 )
+	if( x < 300	&&	x > -300 )
 		x=0;
 
-	if( y < 40	&&	y > -40 )
+	if( y < 300	&&	y > -300 )
 		y=0;
 	x*=gear/9;
 	y*=gear/9;

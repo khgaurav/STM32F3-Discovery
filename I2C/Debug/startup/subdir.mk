@@ -18,7 +18,7 @@ startup/%.o: ../startup/%.S
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo $(PWD)
-	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32 -DSTM32F3 -DSTM32F30 -DSTM32F303VCTx -DSTM32F3DISCOVERY -DDEBUG -DSTM32F303xC -DUSE_STDPERIPH_DRIVER -I"/home/gauravkh/workspace/I2C/Utilities" -I"/home/gauravkh/workspace/I2C/StdPeriph_Driver/inc" -I"/home/gauravkh/workspace/I2C/inc" -I"/home/gauravkh/workspace/I2C/CMSIS/device" -I"/home/gauravkh/workspace/I2C/CMSIS/core" -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
+	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32 -DSTM32F3 -DSTM32F30 -DSTM32F303VCTx -DSTM32F3DISCOVERY -DDEBUG -DSTM32F303xC -DUSE_STDPERIPH_DRIVER -I"/home/gauravkh/git/STM32F3-Discovery/I2C/Utilities" -I"/home/gauravkh/git/STM32F3-Discovery/I2C/StdPeriph_Driver/inc" -I"/home/gauravkh/git/STM32F3-Discovery/I2C/inc" -I"/home/gauravkh/git/STM32F3-Discovery/I2C/CMSIS/device" -I"/home/gauravkh/git/STM32F3-Discovery/I2C/CMSIS/core" -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

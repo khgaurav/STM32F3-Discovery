@@ -196,7 +196,13 @@ void UART_Init()
 	// Enable UART
 	USART_Cmd(UART4, ENABLE);
 }
-
+void shut()
+{
+	GPIO_ResetBits(GPIOE,GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10| GPIO_Pin_8);
+	GPIO_ResetBits(GPIOA,GPIO_Pin_11 | GPIO_Pin_10 | GPIO_Pin_9 | GPIO_Pin_8 | GPIO_Pin_7 | GPIO_Pin_6 | GPIO_Pin_5 | GPIO_Pin_4 | GPIO_Pin_3 | GPIO_Pin_2 | GPIO_Pin_1 | GPIO_Pin_0);
+	TIM_SetCompare1(TIM1, 0);
+	TIM_SetCompare2(TIM1, 0);
+}
 void motorcode(long double x, long double y,long double gear)
 {
 	//Converting to Normal Coordinates
@@ -333,6 +339,7 @@ int main(void)
 	gpioinit1();
 	pwminit();
 	UART_Init();
+	shut();
 	while(1)
 	{
 		char d=USART_ReceiveData(UART4);
@@ -352,9 +359,7 @@ int main(void)
 			else
 
 					{
-						GPIO_ResetBits(GPIOE,GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10 | GPIO_Pin_8);
-						TIM_SetCompare1(TIM1, 0);
-						TIM_SetCompare2(TIM1, 0);
+						shut();
 						continue;
 					}
 			if(uartreceive()=='y')
@@ -364,9 +369,7 @@ int main(void)
 
 			else
 					{
-						GPIO_ResetBits(GPIOE,GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10 | GPIO_Pin_8);
-						TIM_SetCompare1(TIM1, 0);
-						TIM_SetCompare2(TIM1, 0);
+						shut();
 						continue;
 					}
 
@@ -383,9 +386,7 @@ int main(void)
 
 		else
 			{
-				GPIO_ResetBits(GPIOE,GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10 | GPIO_Pin_8);
-				TIM_SetCompare1(TIM1, 0);
-				TIM_SetCompare2(TIM1, 0);
+				shut();
 				continue;
 
 			}
@@ -394,9 +395,7 @@ int main(void)
 			cnt++;
 			if(cnt>100)
 			{
-				GPIO_ResetBits(GPIOE,GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10 | GPIO_Pin_8);
-				TIM_SetCompare1(TIM1, 0);
-				TIM_SetCompare2(TIM1, 0);
+				shut();
 				continue;
 			}
 		}

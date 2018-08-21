@@ -16,7 +16,7 @@ def arm():
 	up=j.get_button(4)
 	down=j.get_button(2)
 	c=0
-	ser.write('n'.encode())
+	ser.write('a'.encode())
 	if m1:
 			c=1
 			if up:
@@ -90,7 +90,7 @@ def motorcode():
 	#print(ser.read(),ser.read(),ser.read(),ser.read())
 	print('m'+str(gear)+'x'+x+'y'+y)
 count =0
-ser=serial.Serial('/dev/ttyUSB0',9600)
+ser=serial.Serial('/dev/ttyUSB0',19200)
 joystick.init()
 pygame.display.init()
 j=joystick.Joystick(0)

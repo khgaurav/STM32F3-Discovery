@@ -214,31 +214,31 @@ void motorcode(long double x, long double y,long double gear)
 			y=0;
 	//Buffer for (0,0)
 	if( x < (period/2)+200	&&	x > (period/2)-200 )
-		x=0;
+		x=period/2;
 
 	if( y < (period/2)+200	&&	y > (period/2)-200 )
-		y=0;
+		y=period/2;
 	x*=gear/9;
 	y*=gear/9;
 	if(x>0)
 	{
-		GPIO_SetBits(GPIOE,GPIO_Pin_13);
+
 		TIM_SetCompare1(TIM1, x);
 	}
 	else
 	{
-		GPIO_ResetBits(GPIOE,GPIO_Pin_13);
+
 		TIM_SetCompare1(TIM1, -x);
 	}
 
 	if(y>0)
 	{
-		GPIO_SetBits(GPIOE,GPIO_Pin_12);
+
 		TIM_SetCompare2(TIM1, y);
 	}
 	else
 	{
-		GPIO_ResetBits(GPIOE,GPIO_Pin_12);
+
 		TIM_SetCompare2(TIM1, -y);
 	}
 

@@ -1,11 +1,11 @@
 /**
-  ******************************************************************************
+  **************************
   * @file    main.c
   * @author  Gaurav K H
   * @version V1.0
   * @date    04-August-2018
   * @brief   Motor Code
-  ******************************************************************************
+  **************************
 */
 
 
@@ -16,14 +16,18 @@
 int uartreceive()
 {
 	int cnt=0;
-	//Waiting for register to update
-	while(!USART_GetFlagStatus(UART4, USART_FLAG_RXNE))
-	{
-		cnt++;
-		if(cnt>20000)
-			break;
-	}
-	return USART_ReceiveData(UART4);
+	while(!USART_GetFlagStatus(UART5, USART_FLAG_RXNE))
+		{
+			cnt++;
+			if(cnt>2000000000)
+			{
+				USART_ClearITPendingBit(UART5, USART_IT_RXNE);
+				return 0;
+				break;
+			}
+
+		}
+	return USART_ReceiveData(UART5);
 }
 
 //Map function
@@ -132,12 +136,13 @@ void UART_Init()
 
 	// Enable GPIO clock
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOD, ENABLE);
 
 	// Enable UART clock
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART5, ENABLE);
 
 	/* UART configuration */
-	USART_InitStructure.USART_BaudRate = 19200;
+	USART_InitStructure.USART_BaudRate = 57600;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	USART_InitStructure.USART_Parity = USART_Parity_No;
@@ -152,28 +157,28 @@ void UART_Init()
 					- Hardware flow control disabled (RTS and CTS signals)
 					- Receive and transmit enabled
 	*/
-	USART_Init(UART4, &USART_InitStructure);
+	USART_Init(UART5, &USART_InitStructure);
 
 	// Configure UART Tx as alternate function push-pull
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
 
 	// Configure UART Rx as alternate function push-pull
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
-	GPIO_Init(GPIOC, &GPIO_InitStructure);
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+	GPIO_Init(GPIOD, &GPIO_InitStructure);
 
 	// Connect PC10 to UART4_Tx
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource10, GPIO_AF_5);
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource12, GPIO_AF_5);
 
 	// Connect PC11 to UART4_Rx
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource11, GPIO_AF_5);
+	GPIO_PinAFConfig(GPIOD, GPIO_PinSource2, GPIO_AF_5);
 
 	// Enable UART
-	USART_Cmd(UART4, ENABLE);
+	USART_Cmd(UART5, ENABLE);
 }
 
 void motorcode(long double x, long double y,long double gear)
@@ -250,7 +255,7 @@ int main(void)
 	UART_Init();
 	while(1)
 	{
-		if(USART_ReceiveData(UART4)=='m')
+		if(uartreceive()=='m')
 
 		{
 			GPIO_SetBits(GPIOE, GPIO_Pin_10);
@@ -296,7 +301,7 @@ int main(void)
 				continue;
 
 			}
-		if(xprev == x && yprev == y && gprev == gear)
+		/*if(xprev == x && yprev == y && gprev == gear)
 		{
 			cnt++;
 			if(cnt>100)
@@ -310,6 +315,6 @@ int main(void)
 		else
 		{
 			cnt=0;
-		}
+		}*/
 	}
 }

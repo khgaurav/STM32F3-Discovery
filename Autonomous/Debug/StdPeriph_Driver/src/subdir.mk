@@ -81,7 +81,7 @@ StdPeriph_Driver/src/%.o: ../StdPeriph_Driver/src/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo $(PWD)
-	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32 -DSTM32F3 -DSTM32F30 -DSTM32F303VCTx -DSTM32F3DISCOVERY -DDEBUG -DSTM32F303xC -DUSE_STDPERIPH_DRIVER -I"/home/gauravkh/workspace/Autonomous/Utilities" -I"/home/gauravkh/workspace/Autonomous/StdPeriph_Driver/inc" -I"/home/gauravkh/workspace/Autonomous/inc" -I"/home/gauravkh/workspace/Autonomous/CMSIS/device" -I"/home/gauravkh/workspace/Autonomous/CMSIS/core" -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
+	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32 -DSTM32F3 -DSTM32F30 -DSTM32F303VCTx -DSTM32F3DISCOVERY -DDEBUG -DSTM32F303xC -DUSE_STDPERIPH_DRIVER -I"/home/gauravkh/git/STM32F3-Discovery/Autonomous/Utilities" -I"/home/gauravkh/git/STM32F3-Discovery/Autonomous/StdPeriph_Driver/inc" -I"/home/gauravkh/git/STM32F3-Discovery/Autonomous/inc" -I"/home/gauravkh/git/STM32F3-Discovery/Autonomous/CMSIS/device" -I"/home/gauravkh/git/STM32F3-Discovery/Autonomous/CMSIS/core" -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

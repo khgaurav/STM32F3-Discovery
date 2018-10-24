@@ -20,7 +20,7 @@ int uartreceive()
 	while(!USART_GetFlagStatus(UART4, USART_FLAG_RXNE))
 	{
 		cnt++;
-		if(cnt>20000)
+		if(cnt>20000000)
 			return 0;
 	}
 	return USART_ReceiveData(UART4);
@@ -120,7 +120,7 @@ void pwminit()
 	GPIO_PinAFConfig(GPIOE, GPIO_PinSource9, GPIO_AF_2);
 	GPIO_PinAFConfig(GPIOE, GPIO_PinSource11, GPIO_AF_2);
 
-	TIM_TimeBaseStructure.TIM_Period = 4800-1;
+	TIM_TimeBaseStructure.TIM_Period = 5800-1;
 	TIM_TimeBaseStructure.TIM_Prescaler = 0;
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -130,7 +130,7 @@ void pwminit()
 
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStructure.TIM_Pulse = 4799;
+	TIM_OCInitStructure.TIM_Pulse = 5799;
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
 
 	TIM_OC1Init(TIM1, &TIM_OCInitStructure);
@@ -198,10 +198,10 @@ void UART_Init()
 }
 void shut()
 {
-	GPIO_ResetBits(GPIOE,GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10| GPIO_Pin_8);
+	/*GPIO_ResetBits(GPIOE,GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10| GPIO_Pin_8);
 	GPIO_ResetBits(GPIOA,GPIO_Pin_11 | GPIO_Pin_10 | GPIO_Pin_9 | GPIO_Pin_8 | GPIO_Pin_7 | GPIO_Pin_6 | GPIO_Pin_5 | GPIO_Pin_4 | GPIO_Pin_3 | GPIO_Pin_2 | GPIO_Pin_1 | GPIO_Pin_0);
 	TIM_SetCompare1(TIM1, 0);
-	TIM_SetCompare2(TIM1, 0);
+	TIM_SetCompare2(TIM1, 0);*/
 
 }
 void motorcode(long double x, long double y,long double gear)
@@ -229,13 +229,13 @@ void motorcode(long double x, long double y,long double gear)
 	ellipticalDiscToSquare(x, y, &xans, &yans);
 
 
-	x=(int)map(xans,-0.991273,0.991273,-4799,4799);
-	y=(int)map(yans,-0.991273,0.991273,-4799,4799);
+	x=(int)map(xans,-0.991273,0.991273,-5799,5799);
+	y=(int)map(yans,-0.991273,0.991273,-5799,5799);
 
-	if(x>4500)
-			x=4799;
-	if(y>4500)
-			y=4799;
+	if(x>5500)
+			x=5799;
+	if(y>5500)
+			y=5799;
 
 	//Buffer for (0,0)
 	if( x < 300	&&	x > -300 )

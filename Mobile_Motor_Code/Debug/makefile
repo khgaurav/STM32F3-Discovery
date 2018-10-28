@@ -32,10 +32,10 @@ endif
 all: Mobile_Motor_Code.elf
 
 # Tool invocations
-Mobile_Motor_Code.elf: $(OBJS) $(USER_OBJS) /home/gauravkh/workspace/Mobile_Motor_Code/LinkerScript.ld
+Mobile_Motor_Code.elf: $(OBJS) $(USER_OBJS) /home/gauravkh/git/STM32F3-Discovery/Mobile_Motor_Code/LinkerScript.ld
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU GCC Linker'
-	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -T"/home/gauravkh/workspace/Mobile_Motor_Code/LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "Mobile_Motor_Code.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
+	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -T"/home/gauravkh/git/STM32F3-Discovery/Mobile_Motor_Code/LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "Mobile_Motor_Code.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
 	@echo 'Finished building target: $@'
 	@echo ' '
 	$(MAKE) --no-print-directory post-build

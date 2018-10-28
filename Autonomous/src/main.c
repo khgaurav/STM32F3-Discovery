@@ -20,7 +20,7 @@ int uartreceive()
 	while(!USART_GetFlagStatus(UART4, USART_FLAG_RXNE))
 	{
 		cnt++;
-		if(cnt>20000000)
+		if(cnt>200000000)
 			return 0;
 	}
 	return USART_ReceiveData(UART4);

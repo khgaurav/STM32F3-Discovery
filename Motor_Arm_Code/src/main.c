@@ -1,13 +1,3 @@
-/**
-  ******************************************************************************
-   * @file    main.c
-  * @author  Gaurav K H
-  * @version V1.0
-  * @date    04-August-2018
-  * @brief   Motor Code
-  ******************************************************************************
-*/
-
 
 #include "stm32f30x.h"
 #include "stm32f3_discovery.h"
@@ -20,7 +10,7 @@ int uartreceive()
 	while(!USART_GetFlagStatus(UART4, USART_FLAG_RXNE))
 	{
 		cnt++;
-		if(cnt>20000)
+		if(cnt>20000000)
 			return 0;
 	}
 	return USART_ReceiveData(UART4);
@@ -62,7 +52,7 @@ void gpioinit()
 
 	//SET GPIO PIN 10, 12, 13 as output pins
 	GPIO_InitTypeDef GPIO_InitStruct;
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_13| GPIO_Pin_12| GPIO_Pin_10 | GPIO_Pin_8;
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_13| GPIO_Pin_12| GPIO_Pin_10 |GPIO_Pin_11 | GPIO_Pin_8;
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
@@ -70,7 +60,7 @@ void gpioinit()
 
 	// Initialization of GPIO PORT E Pin 10, 13 and Pin 12
 	GPIO_Init(GPIOE,&GPIO_InitStruct);
-	GPIO_ResetBits(GPIOE,GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10 | GPIO_Pin_8);
+	GPIO_ResetBits(GPIOE,GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10 |GPIO_Pin_11 | GPIO_Pin_8);
 
 
 }
@@ -105,11 +95,14 @@ void pwminit()
 
 	//enable the AHB Peripheral Clock to use GPIOE
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOE, ENABLE);
-	//enable the TIM1 clock
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
+	//enable the TIM1 and 3 clock
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
 
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+
 	// Pin configuration of PWM
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_11;
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_9 | GPIO_Pin_11;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -117,31 +110,45 @@ void pwminit()
 
 	GPIO_Init(GPIOE, &GPIO_InitStructure);
 
-	GPIO_PinAFConfig(GPIOE, GPIO_PinSource9, GPIO_AF_2);
-	GPIO_PinAFConfig(GPIOE, GPIO_PinSource11, GPIO_AF_2);
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_6 | GPIO_Pin_7;
 
-	TIM_TimeBaseStructure.TIM_Period = 5800-1;
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+	GPIO_PinAFConfig(GPIOE, GPIO_PinSource9, GPIO_AF_2);//Right front
+	GPIO_PinAFConfig(GPIOE, GPIO_PinSource11, GPIO_AF_2);//Left front
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource6, GPIO_AF_2);//Right back
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource7, GPIO_AF_2);//Left back
+
+	TIM_TimeBaseStructure.TIM_Period = 4800-1;
 	TIM_TimeBaseStructure.TIM_Prescaler = 0;
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
 
-	TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
+	TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);//For GPIOE 9,11
+	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);//For GPIOE 4,5
 
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStructure.TIM_Pulse = 5799;
+	TIM_OCInitStructure.TIM_Pulse = 4799;
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
 
 	TIM_OC1Init(TIM1, &TIM_OCInitStructure);
 	TIM_OC2Init(TIM1, &TIM_OCInitStructure);
-
+	TIM_OC1Init(TIM3, &TIM_OCInitStructure);
+	TIM_OC2Init(TIM3, &TIM_OCInitStructure);
 	//enable the PWM output
 	TIM_CtrlPWMOutputs(TIM1, ENABLE);
 	TIM_Cmd(TIM1, ENABLE);
 
 	TIM_SetCompare1(TIM1, 0);
 	TIM_SetCompare2(TIM1, 0);
+
+	TIM_CtrlPWMOutputs(TIM3, ENABLE);
+	TIM_Cmd(TIM3, ENABLE);
+
+	TIM_SetCompare1(TIM3, 0);
+	TIM_SetCompare2(TIM3, 0);
 
 }
 
@@ -198,12 +205,24 @@ void UART_Init()
 }
 void shut()
 {
-	GPIO_ResetBits(GPIOE,GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10| GPIO_Pin_8);
+
+
+	GPIO_ResetBits(GPIOE,GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10|GPIO_Pin_11 | GPIO_Pin_8);
 	GPIO_ResetBits(GPIOA,GPIO_Pin_11 | GPIO_Pin_10 | GPIO_Pin_9 | GPIO_Pin_8 | GPIO_Pin_7 | GPIO_Pin_6 | GPIO_Pin_5 | GPIO_Pin_4 | GPIO_Pin_3 | GPIO_Pin_2 | GPIO_Pin_1 | GPIO_Pin_0);
 	TIM_SetCompare1(TIM1, 0);
 	TIM_SetCompare2(TIM1, 0);
 
 }
+
+void Delay(int time)
+{
+	volatile int i,j;
+
+	time = time*10;
+	for (i=0;i<time;i++)
+		j++;
+}
+
 void motorcode(long double x, long double y,long double gear)
 {
 	//Converting to Normal Coordinates
@@ -229,13 +248,13 @@ void motorcode(long double x, long double y,long double gear)
 	ellipticalDiscToSquare(x, y, &xans, &yans);
 
 
-	x=(int)map(xans,-0.991273,0.991273,-5799,5799);
-	y=(int)map(yans,-0.991273,0.991273,-5799,5799);
+	x=(int)map(xans,-0.991273,0.991273,-4799,4799);
+	y=(int)map(yans,-0.991273,0.991273,-4799,4799);
 
-	if(x>5500)
-			x=5799;
-	if(y>5500)
-			y=5799;
+	if(x>4500)
+			x=4799;
+	if(y>4500)
+			y=4799;
 
 	//Buffer for (0,0)
 	if( x < 300	&&	x > -300 )
@@ -249,22 +268,26 @@ void motorcode(long double x, long double y,long double gear)
 	{
 		GPIO_SetBits(GPIOE,GPIO_Pin_13);
 		TIM_SetCompare1(TIM1, x);
+		TIM_SetCompare1(TIM3, x);
 	}
 	else
 	{
 		GPIO_ResetBits(GPIOE,GPIO_Pin_13);
 		TIM_SetCompare1(TIM1, -x);
+		TIM_SetCompare1(TIM3, -x);
 	}
 
 	if(y>0)
 	{
 		GPIO_SetBits(GPIOE,GPIO_Pin_12);
 		TIM_SetCompare2(TIM1, y);
+		TIM_SetCompare2(TIM3, y);
 	}
 	else
 	{
 		GPIO_ResetBits(GPIOE,GPIO_Pin_12);
 		TIM_SetCompare2(TIM1, -y);
+		TIM_SetCompare2(TIM3, -y);
 	}
 
 }
@@ -272,54 +295,83 @@ void armcode(char link)
 {
 	if(link=='A')
 		{
-			GPIO_SetBits(GPIOA,GPIO_Pin_0);
-			GPIO_SetBits(GPIOA,GPIO_Pin_1);
+
+		GPIO_SetBits(GPIOA,GPIO_Pin_0); // gripper close
+					GPIO_SetBits(GPIOA,GPIO_Pin_1);
 		}
 	else if(link=='B')
 		{
-			GPIO_SetBits(GPIOA,GPIO_Pin_0);
+			GPIO_SetBits(GPIOA,GPIO_Pin_0); // gripper open
 			GPIO_ResetBits(GPIOA,GPIO_Pin_1);
 		}
 	else if(link=='C')
 		{
-			GPIO_SetBits(GPIOA,GPIO_Pin_2);
+			GPIO_SetBits(GPIOA,GPIO_Pin_2); //linear act. f
 			GPIO_SetBits(GPIOA,GPIO_Pin_3);
 		}
 	else if(link=='D')
 		{
-			GPIO_SetBits(GPIOA,GPIO_Pin_2);
+			GPIO_SetBits(GPIOA,GPIO_Pin_2); /// linear act. b
 			GPIO_ResetBits(GPIOA,GPIO_Pin_3);
 		}
 	else if(link=='E')
 		{
-			GPIO_SetBits(GPIOA,GPIO_Pin_4);
-			GPIO_SetBits(GPIOA,GPIO_Pin_5);
+		GPIO_SetBits(GPIOA,GPIO_Pin_6); //roll f
+		GPIO_SetBits(GPIOA,GPIO_Pin_7);
+
 		}
 	else if(link=='F')
 		{
-			GPIO_SetBits(GPIOA,GPIO_Pin_4);
-			GPIO_ResetBits(GPIOA,GPIO_Pin_5);
+
+		GPIO_SetBits(GPIOA,GPIO_Pin_6); /// roll b
+					GPIO_ResetBits(GPIOA,GPIO_Pin_7);
+
 		}
+
+
 	else if(link=='G')
-		{
-			GPIO_SetBits(GPIOA,GPIO_Pin_6);
-			GPIO_SetBits(GPIOA,GPIO_Pin_7);
+		{ //link 2 clockwise
+		 GPIO_SetBits(GPIOA,GPIO_Pin_5);//pin pa5 is pulse +ve
+		GPIO_SetBits(GPIOA,GPIO_Pin_4);//pin pa4 is direction +ve
+	    Delay(3);
+// pin4--12 , pin5--13
+					    		     		// Delay(100);
+	 GPIO_ResetBits(GPIOA,GPIO_Pin_5);
+     GPIO_ResetBits(GPIOA,GPIO_Pin_4);
 		}
 	else if(link=='H')
 		{
-			GPIO_SetBits(GPIOA,GPIO_Pin_6);
-			GPIO_ResetBits(GPIOA,GPIO_Pin_7);
+   // anti clockwise
+		                GPIO_ResetBits(GPIOA,GPIO_Pin_5);
+		                  	GPIO_SetBits(GPIOA,GPIO_Pin_4);
+		                  	Delay(3);
+		               		 GPIO_SetBits(GPIOA,GPIO_Pin_5);
+		                    	GPIO_ResetBits(GPIOA,GPIO_Pin_4);
+		                    	//Delay(7);
 		}
 	else if(link=='I')
 		{
-			GPIO_SetBits(GPIOA,GPIO_Pin_8);
-			GPIO_SetBits(GPIOA,GPIO_Pin_9);
+		   GPIO_SetBits(GPIOA,GPIO_Pin_9); //11-->9
+				GPIO_SetBits(GPIOA,GPIO_Pin_8);  //10-->8
+						 Delay(3);
+             GPIO_ResetBits(GPIOA,GPIO_Pin_9);
+				GPIO_ResetBits(GPIOA,GPIO_Pin_8);
+			//	Delay(7);
 		}
 	else if(link=='J')
 		{
-			GPIO_SetBits(GPIOA,GPIO_Pin_8);
-			GPIO_ResetBits(GPIOA,GPIO_Pin_9);
+
+		//pitch anticlock
+		                  GPIO_ResetBits(GPIOA,GPIO_Pin_9);
+				           	GPIO_SetBits(GPIOA,GPIO_Pin_8);
+		                 	Delay(3);
+				                GPIO_SetBits(GPIOA,GPIO_Pin_9);
+				              	GPIO_ResetBits(GPIOA,GPIO_Pin_8);
+				                //	Delay(7);
 		}
+
+
+
 	else if(link=='K')
 		{
 			GPIO_SetBits(GPIOA,GPIO_Pin_10);
@@ -335,7 +387,7 @@ void armcode(char link)
 
 int main(void)
 {
-	uint32_t x = 0, y = 0, gear = 0, xprev, yprev, gprev, cnt;
+	uint32_t x = 0, y = 0, gear = 0;
 
 	gpioinit();
 	gpioinit1();
@@ -344,15 +396,14 @@ int main(void)
 	shut();
 	while(1)
 	{
+
 		char d=USART_ReceiveData(UART4);
 		if(d=='m')
 
 		{
 			GPIO_SetBits(GPIOE, GPIO_Pin_10);
 			motorcode(x,y,gear);
-			xprev=x;
-			yprev=y;
-			gprev=gear;
+
 			gear=uartreceive()-'0';
 			if(uartreceive()=='x')
 					{
@@ -390,18 +441,6 @@ int main(void)
 				continue;
 
 			}
-		if(xprev == x && yprev == y && gprev == gear)
-		{
-			cnt++;
-			if(cnt>100000)
-			{
-				shut();
-				continue;
-			}
-		}
-		else
-		{
-			cnt=0;
-		}
+
 	}
-}
+	}

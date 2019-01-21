@@ -1,4 +1,3 @@
-
 #include "stm32f30x.h"
 #include "stm32f3_discovery.h"
 #include "math.h"
@@ -52,7 +51,7 @@ void gpioinit()
 
 	//SET GPIO PIN 10, 12, 13 as output pins
 	GPIO_InitTypeDef GPIO_InitStruct;
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_13| GPIO_Pin_12| GPIO_Pin_10 |GPIO_Pin_11 | GPIO_Pin_8;
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_15|GPIO_Pin_14|GPIO_Pin_13| GPIO_Pin_12| GPIO_Pin_10 |GPIO_Pin_11 | GPIO_Pin_8;
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
@@ -60,7 +59,7 @@ void gpioinit()
 
 	// Initialization of GPIO PORT E Pin 10, 13 and Pin 12
 	GPIO_Init(GPIOE,&GPIO_InitStruct);
-	GPIO_ResetBits(GPIOE,GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10 |GPIO_Pin_11 | GPIO_Pin_8);
+	GPIO_ResetBits(GPIOE,GPIO_Pin_15|GPIO_Pin_14|GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10 |GPIO_Pin_11 | GPIO_Pin_8);
 
 
 }
@@ -207,7 +206,7 @@ void shut()
 {
 
 
-	GPIO_ResetBits(GPIOE,GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10|GPIO_Pin_11 | GPIO_Pin_8);
+	GPIO_ResetBits(GPIOE,GPIO_Pin_15|GPIO_Pin_14|GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10|GPIO_Pin_11 | GPIO_Pin_8);
 	GPIO_ResetBits(GPIOA,GPIO_Pin_11 | GPIO_Pin_10 | GPIO_Pin_9 | GPIO_Pin_8 | GPIO_Pin_7 | GPIO_Pin_6 | GPIO_Pin_5 | GPIO_Pin_4 | GPIO_Pin_3 | GPIO_Pin_2 | GPIO_Pin_1 | GPIO_Pin_0);
 	TIM_SetCompare1(TIM1, 0);
 	TIM_SetCompare2(TIM1, 0);
@@ -296,96 +295,103 @@ void motorcode(long double x, long double y,long double gear)
 void armcode(char link)
 {
 	if(link=='A')
-		{
+			{
 
-		GPIO_SetBits(GPIOA,GPIO_Pin_0); // gripper close
-					GPIO_SetBits(GPIOA,GPIO_Pin_1);
-		}
-	else if(link=='B')
-		{
-			GPIO_SetBits(GPIOA,GPIO_Pin_0); // gripper open
-			GPIO_ResetBits(GPIOA,GPIO_Pin_1);
-		}
-	else if(link=='C')
-		{
-			GPIO_SetBits(GPIOA,GPIO_Pin_2); //linear act. f
+			GPIO_SetBits(GPIOA,GPIO_Pin_2); // swivel close
 			GPIO_SetBits(GPIOA,GPIO_Pin_3);
-		}
-	else if(link=='D')
-		{
-			GPIO_SetBits(GPIOA,GPIO_Pin_2); /// linear act. b
-			GPIO_ResetBits(GPIOA,GPIO_Pin_3);
-		}
-	else if(link=='E')
-		{
-		GPIO_SetBits(GPIOA,GPIO_Pin_6); //roll f
-		GPIO_SetBits(GPIOA,GPIO_Pin_7);
+			}
+		else if(link=='B')
+			{
+				GPIO_SetBits(GPIOA,GPIO_Pin_2); // swivel open
+				GPIO_ResetBits(GPIOA,GPIO_Pin_3);
+			}
+		else if(link=='C')
+			{
+				GPIO_SetBits(GPIOA,GPIO_Pin_8); //linear act. f
+				GPIO_SetBits(GPIOA,GPIO_Pin_9);
+			}
+		else if(link=='D')
+			{
+				GPIO_SetBits(GPIOA,GPIO_Pin_8); /// linear act. b
+				GPIO_ResetBits(GPIOA,GPIO_Pin_9);
+			}
+		else if(link=='E')
+			{
 
-		}
-	else if(link=='F')
-		{
+			GPIO_SetBits(GPIOE,GPIO_Pin_15); //roll b
+				GPIO_SetBits(GPIOE,GPIO_Pin_14);
 
-		GPIO_SetBits(GPIOA,GPIO_Pin_6); /// roll b
-					GPIO_ResetBits(GPIOA,GPIO_Pin_7);
+		         GPIO_SetBits(GPIOA,GPIO_Pin_4);
+				 GPIO_ResetBits(GPIOA,GPIO_Pin_5);
 
-		}
+			}
+		else if(link=='F')
+			{
 
+				GPIO_SetBits(GPIOE,GPIO_Pin_15); //roll f
+					GPIO_ResetBits(GPIOE,GPIO_Pin_14);
 
-	else if(link=='G')
-		{ //link 2 clockwise
-		 GPIO_SetBits(GPIOA,GPIO_Pin_5);//pin pa5 is pulse +ve
-		GPIO_SetBits(GPIOA,GPIO_Pin_4);//pin pa4 is direction +ve
-	    Delay(3);
-// pin4--12 , pin5--13
-					    		     		// Delay(100);
-	 GPIO_ResetBits(GPIOA,GPIO_Pin_5);
-     GPIO_ResetBits(GPIOA,GPIO_Pin_4);
-		}
-	else if(link=='H')
-		{
-   // anti clockwise
-		                GPIO_ResetBits(GPIOA,GPIO_Pin_5);
-		                  	GPIO_SetBits(GPIOA,GPIO_Pin_4);
-		                  	Delay(3);
-		               		 GPIO_SetBits(GPIOA,GPIO_Pin_5);
-		                    	GPIO_ResetBits(GPIOA,GPIO_Pin_4);
-		                    	//Delay(7);
-		}
-	else if(link=='I')
-		{
-		   GPIO_SetBits(GPIOA,GPIO_Pin_9); //11-->9
-				GPIO_SetBits(GPIOA,GPIO_Pin_8);  //10-->8
-						 Delay(3);
-             GPIO_ResetBits(GPIOA,GPIO_Pin_9);
-				GPIO_ResetBits(GPIOA,GPIO_Pin_8);
-			//	Delay(7);
-		}
-	else if(link=='J')
-		{
-
-		//pitch anticlock
-		                  GPIO_ResetBits(GPIOA,GPIO_Pin_9);
-				           	GPIO_SetBits(GPIOA,GPIO_Pin_8);
-		                 	Delay(3);
-				                GPIO_SetBits(GPIOA,GPIO_Pin_9);
-				              	GPIO_ResetBits(GPIOA,GPIO_Pin_8);
-				                //	Delay(7);
-		}
+			         GPIO_SetBits(GPIOA,GPIO_Pin_4);
+					 GPIO_SetBits(GPIOA,GPIO_Pin_5);
+			}
 
 
+		else if(link=='G')
+			{ //gripper
+			GPIO_SetBits(GPIOA,GPIO_Pin_6);
+		 GPIO_SetBits(GPIOA,GPIO_Pin_7);
 
-	else if(link=='K')
-		{
-			GPIO_SetBits(GPIOA,GPIO_Pin_10);
-			GPIO_SetBits(GPIOA,GPIO_Pin_11);
-		}
-	else if(link=='L')
-		{
-			GPIO_SetBits(GPIOA,GPIO_Pin_10);
-			GPIO_ResetBits(GPIOA,GPIO_Pin_11);
-		}
-	else if(link=='M')
-		shut();
+
+			}
+		else if(link=='H')
+			{
+			GPIO_SetBits(GPIOA,GPIO_Pin_6);
+			 GPIO_ResetBits(GPIOA,GPIO_Pin_7);
+			}
+		else if(link=='I')
+			{
+			GPIO_SetBits(GPIOE,GPIO_Pin_15); //PITCH b
+				GPIO_SetBits(GPIOE,GPIO_Pin_14);
+
+		         GPIO_SetBits(GPIOA,GPIO_Pin_4);
+				 GPIO_SetBits(GPIOA,GPIO_Pin_5);
+
+			}
+		else if(link=='J')
+			{
+
+			GPIO_SetBits(GPIOE,GPIO_Pin_15); //PITCH b
+				GPIO_ResetBits(GPIOE,GPIO_Pin_14);
+
+		         GPIO_SetBits(GPIOA,GPIO_Pin_4);
+				 GPIO_ResetBits(GPIOA,GPIO_Pin_5);
+
+			}
+
+
+		else if(link=='K')
+				{//link 2 linear act.
+					GPIO_SetBits(GPIOA,GPIO_Pin_0);
+					GPIO_SetBits(GPIOA,GPIO_Pin_1);
+				}
+			else if(link=='L')
+				{
+					GPIO_SetBits(GPIOA,GPIO_Pin_0);
+					GPIO_ResetBits(GPIOA,GPIO_Pin_1);
+				}
+		/*else if(link=='K')
+			{
+				GPIO_SetBits(GPIOA,GPIO_Pin_10);
+				GPIO_SetBits(GPIOA,GPIO_Pin_11);
+			}
+		else if(link=='L')
+			{
+				GPIO_SetBits(GPIOA,GPIO_Pin_10);
+				GPIO_ResetBits(GPIOA,GPIO_Pin_11);
+			}*/
+		else if(link=='M')
+			shut();
+
 }
 
 int main(void)

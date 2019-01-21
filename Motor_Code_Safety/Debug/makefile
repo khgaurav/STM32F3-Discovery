@@ -32,10 +32,10 @@ endif
 all: Motor_Code_Safety.elf
 
 # Tool invocations
-Motor_Code_Safety.elf: $(OBJS) $(USER_OBJS) /home/gauravkh/workspace/Motor_Code_Safety/LinkerScript.ld
+Motor_Code_Safety.elf: $(OBJS) $(USER_OBJS) /home/gauravkh/git/STM32F3-Discovery/Motor_Code_Safety/LinkerScript.ld
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU GCC Linker'
-	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -T"/home/gauravkh/workspace/Motor_Code_Safety/LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "Motor_Code_Safety.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
+	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -T"/home/gauravkh/git/STM32F3-Discovery/Motor_Code_Safety/LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "Motor_Code_Safety.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
 	@echo 'Finished building target: $@'
 	@echo ' '
 	$(MAKE) --no-print-directory post-build

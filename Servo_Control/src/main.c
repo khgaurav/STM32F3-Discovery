@@ -154,7 +154,7 @@ int main(void)
 	UART_Init();
 	while(1)
 	{
-		if(1)
+		if(uartreceive()=='s')
 		{
 			for(int i=min;i<max;i++)
 			{

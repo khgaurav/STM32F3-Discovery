@@ -48,7 +48,7 @@ void gpioinit()
 {
 	//Enable clock for GPIOE
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOE,ENABLE);
-
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
 	//SET GPIO PIN 10, 12, 13 as output pins
 	GPIO_InitTypeDef GPIO_InitStruct;
 	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_15|GPIO_Pin_14|GPIO_Pin_13| GPIO_Pin_12| GPIO_Pin_10 |GPIO_Pin_11 | GPIO_Pin_8;
@@ -59,8 +59,12 @@ void gpioinit()
 
 	// Initialization of GPIO PORT E Pin 10, 13 and Pin 12
 	GPIO_Init(GPIOE,&GPIO_InitStruct);
-	GPIO_ResetBits(GPIOE,GPIO_Pin_15|GPIO_Pin_14|GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10 |GPIO_Pin_11 | GPIO_Pin_8);
 
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_3 |GPIO_Pin_5 | GPIO_Pin_8;
+	GPIO_Init(GPIOB, &GPIO_InitStruct);//Camera Pins
+
+	GPIO_ResetBits(GPIOE,GPIO_Pin_15|GPIO_Pin_14|GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10 |GPIO_Pin_11 | GPIO_Pin_8);
+	GPIO_ResetBits(GPIOB,GPIO_Pin_1 | GPIO_Pin_3 |GPIO_Pin_5 | GPIO_Pin_8);
 
 }
 void gpioinit1()
@@ -208,6 +212,7 @@ void shut()
 
 	GPIO_ResetBits(GPIOE,GPIO_Pin_15|GPIO_Pin_14|GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10|GPIO_Pin_11 | GPIO_Pin_8);
 	GPIO_ResetBits(GPIOA,GPIO_Pin_11 | GPIO_Pin_10 | GPIO_Pin_9 | GPIO_Pin_8 | GPIO_Pin_7 | GPIO_Pin_6 | GPIO_Pin_5 | GPIO_Pin_4 | GPIO_Pin_3 | GPIO_Pin_2 | GPIO_Pin_1 | GPIO_Pin_0);
+	GPIO_ResetBits(GPIOB,GPIO_Pin_1 | GPIO_Pin_3 | GPIO_Pin_5 | GPIO_Pin_8);
 	TIM_SetCompare1(TIM1, 0);
 	TIM_SetCompare2(TIM1, 0);
 	TIM_SetCompare1(TIM3, 0);
@@ -393,10 +398,38 @@ void armcode(char link)
 			shut();
 
 }
+void camera(char n)
+{
+	if(n=='a')
+	{
+		GPIO_SetBits(GPIOB,GPIO_Pin_1);
+		GPIO_SetBits(GPIOB,GPIO_Pin_3);
+	}
+	else if(n=='b')
+	{
+		GPIO_SetBits(GPIOB,GPIO_Pin_1);
+		GPIO_ResetBits(GPIOB,GPIO_Pin_3);
+	}
+	else if(n=='c')
+	{
+		GPIO_SetBits(GPIOB,GPIO_Pin_5);
+		GPIO_SetBits(GPIOB,GPIO_Pin_8);
+	}
+	else if(n=='d')
+	{
+		GPIO_SetBits(GPIOB,GPIO_Pin_5);
+		GPIO_ResetBits(GPIOB,GPIO_Pin_8);
+	}
+	else if(n=='z')
+	{
+		shut();
+	}
 
+}
 int main(void)
 {
 	uint32_t x = 0, y = 0, gear = 0;
+	char c = ' ';
 	long cnt=0;
 
 	gpioinit();
@@ -435,8 +468,13 @@ int main(void)
 						//shut();
 						continue;
 					}
+			if(uartreceive()=='c')
+			{
+				c=(uartreceive());
+			}
 
 			motorcode(x,y,gear);
+			camera(c);
 
 			}
 		else if(d=='n')

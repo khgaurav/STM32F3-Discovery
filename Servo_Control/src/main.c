@@ -11,10 +11,87 @@
 
 #include "stm32f30x.h"
 #include "stm32f3_discovery.h"
+
 long double map(long double x, long double in_min, long double in_max, long double out_min, long double out_max)
 {
 	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
+
+int uartreceive()
+{
+	int cnt=0;
+	//Waiting for register to update
+	while(!USART_GetFlagStatus(UART4, USART_FLAG_RXNE))
+	{
+		cnt++;
+			if(cnt>20)
+				return ' ';
+	}
+	return USART_ReceiveData(UART4);
+}
+void uarttransmit(char data)
+{
+	int cnt=0;
+	USART_SendData(UART4,data);
+	        while(USART_GetFlagStatus(USART2,USART_FLAG_TXE)==RESET)
+	        {
+	        	cnt++;
+	        	if(cnt>20)
+	        		break;
+	        }
+}
+void UART_Init()
+{
+
+	USART_InitTypeDef USART_InitStructure;
+	GPIO_InitTypeDef GPIO_InitStructure;
+
+	// Enable GPIO clock
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
+
+	// Enable UART clock
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
+
+	/* UART configuration */
+	USART_InitStructure.USART_BaudRate = 38400;
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+	USART_InitStructure.USART_StopBits = USART_StopBits_1;
+	USART_InitStructure.USART_Parity = USART_Parity_No;
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+
+	/* UART4 configured as follow:
+					- BaudRate = speed parameter above
+					- Word Length = 8 Bits
+					- One Stop Bit
+					- No parity
+					- Hardware flow control disabled (RTS and CTS signals)
+					- Receive and transmit enabled
+	*/
+	USART_Init(UART4, &USART_InitStructure);
+
+	// Configure UART Tx as alternate function push-pull
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+	// Configure UART Rx as alternate function push-pull
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+	// Connect PC10 to UART4_Tx
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource10, GPIO_AF_5);
+
+	// Connect PC11 to UART4_Rx
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource11, GPIO_AF_5);
+
+	// Enable UART
+	USART_Cmd(UART4, ENABLE);
+}
+
 void pwminit()
 {
 	//structure for GPIO setup
@@ -65,40 +142,56 @@ void pwminit()
 	TIM_CtrlPWMOutputs(TIM3, ENABLE);
 	TIM_Cmd(TIM3, ENABLE);
 
-	TIM_SetCompare4(TIM3, 2500);
-	TIM_SetCompare1(TIM3, 2500);
+	TIM_SetCompare4(TIM3, 400);
+	TIM_SetCompare1(TIM3, 400);
 
 }
 
 int main(void)
 {
-	int min=300,max=3000;
+	int min=300,max=3000,angle=0;
 	pwminit();
+	UART_Init();
 	while(1)
 	{
-		for(int i=min;i<max;i++)
+		if(1)
 		{
-			TIM_SetCompare1(TIM3, i);
-			for(int i=0;i<200;i++)
-				for(int i=0;i<100;i++);
-		}
-		for(int i=min;i<max;i++)
-		{
-			TIM_SetCompare4(TIM3, i);
-			for(int i=0;i<200;i++)
-				for(int i=0;i<100;i++);
-		}
-		for(int i=max;i>min;i--)
-		{
-			TIM_SetCompare4(TIM3, i);
-			for(int i=0;i<200;i++)
-				for(int i=0;i<100;i++);
-		}
-		for(int i=max;i>min;i--)
-		{
-			TIM_SetCompare1(TIM3, i);
-			for(int i=0;i<200;i++)
-				for(int i=0;i<100;i++);
+			for(int i=min;i<max;i++)
+			{
+				TIM_SetCompare1(TIM3, i);
+				angle=map(i,min,max,0,360);
+				for(int i=0;i<200;i++)
+					//for(int i=0;i<50;i++)
+						if(uartreceive()=='f')
+							uarttransmit(angle);
+			}
+			for(int i=min;i<max;i++)
+			{
+				angle=180+map(i,min,max,0,360);
+				TIM_SetCompare4(TIM3, i);
+				for(int i=0;i<200;i++)
+					//for(int i=0;i<50;i++)
+						if(uartreceive()=='f')
+							uarttransmit(angle);
+			}
+			for(int i=max;i>min;i--)
+			{
+				angle=180+map(i,min,max,0,360);
+				TIM_SetCompare4(TIM3, i);
+				for(int i=0;i<200;i++)
+					//for(int i=0;i<50;i++)
+						if(uartreceive()=='f')
+							uarttransmit(angle);
+			}
+			for(int i=max;i>min;i--)
+			{
+				angle=map(i,min,max,0,360);
+				TIM_SetCompare1(TIM3, i);
+				for(int i=0;i<200;i++)
+					//for(int i=0;i<50;i++)
+						if(uartreceive()=='f')
+							uarttransmit(angle);
+			}
 		}
 
 	}

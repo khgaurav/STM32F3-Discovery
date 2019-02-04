@@ -1,11 +1,11 @@
 /**
-  ******************************************************************************
+  **************************
   * @file    main.c
   * @author  Ac6
   * @version V1.0
   * @date    01-December-2013
   * @brief   Default main function.
-  ******************************************************************************
+  **************************
 */
 
 
@@ -24,21 +24,34 @@ int uartreceive()
 	while(!USART_GetFlagStatus(UART4, USART_FLAG_RXNE))
 	{
 		cnt++;
-			if(cnt>20)
+			if(cnt>2000)
 				return ' ';
 	}
 	return USART_ReceiveData(UART4);
 }
 void uarttransmit(char data)
 {
-	int cnt=0;
 	USART_SendData(UART4,data);
-	        while(USART_GetFlagStatus(USART2,USART_FLAG_TXE)==RESET)
-	        {
-	        	cnt++;
-	        	if(cnt>20)
-	        		break;
-	        }
+	        while(USART_GetFlagStatus(UART4,USART_FLAG_TXE)==RESET)
+	        {}
+}
+void seperate(int num)
+{
+	int i, rem, len = 0, n;
+
+	    n = num;
+	    while (n != 0)
+	    {
+	        len++;
+	        n /= 10;
+	    }
+
+	    for (i = 0; i < 3; i++)
+	    {
+	        rem = num % 10;
+	        num = num / 10;
+	        uarttransmit(rem + '0');
+	    }
 }
 void UART_Init()
 {
@@ -149,48 +162,63 @@ void pwminit()
 
 int main(void)
 {
-	int min=300,max=3000,angle=0;
+	int min=410,max=2490,angle=0;
 	pwminit();
 	UART_Init();
 	while(1)
 	{
-		if(uartreceive()=='s')
+	start:
+		TIM_SetCompare4(TIM3, min);
+		TIM_SetCompare1(TIM3, min);
+		if(uartreceive()=='s' && uartreceive()=='s')
 		{
 			for(int i=min;i<max;i++)
 			{
 				TIM_SetCompare1(TIM3, i);
-				angle=map(i,min,max,0,360);
+				angle=map(i,min,max,0,180);
 				for(int i=0;i<200;i++)
 					//for(int i=0;i<50;i++)
 						if(uartreceive()=='f')
-							uarttransmit(angle);
+						{
+							seperate(angle);
+							goto start;
+						}
 			}
 			for(int i=min;i<max;i++)
 			{
-				angle=180+map(i,min,max,0,360);
+				angle=180+map(i,min,max,0,180);
 				TIM_SetCompare4(TIM3, i);
 				for(int i=0;i<200;i++)
 					//for(int i=0;i<50;i++)
 						if(uartreceive()=='f')
-							uarttransmit(angle);
+						{
+							seperate(angle);
+							goto start;
+						}
 			}
 			for(int i=max;i>min;i--)
 			{
-				angle=180+map(i,min,max,0,360);
+				angle=180+map(i,min,max,0,180);
 				TIM_SetCompare4(TIM3, i);
 				for(int i=0;i<200;i++)
 					//for(int i=0;i<50;i++)
 						if(uartreceive()=='f')
-							uarttransmit(angle);
+						{
+							seperate(angle);
+							goto start;
+						}
 			}
 			for(int i=max;i>min;i--)
 			{
-				angle=map(i,min,max,0,360);
+				angle=map(i,min,max,0,180);
 				TIM_SetCompare1(TIM3, i);
 				for(int i=0;i<200;i++)
 					//for(int i=0;i<50;i++)
 						if(uartreceive()=='f')
-							uarttransmit(angle);
+						{
+							seperate(angle);
+							goto start;
+						}
 			}
 		}
 

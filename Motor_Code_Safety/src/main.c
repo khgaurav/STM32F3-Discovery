@@ -51,7 +51,7 @@ void gpioinit()
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
 	//SET GPIO PIN 10, 12, 13 as output pins
 	GPIO_InitTypeDef GPIO_InitStruct;
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_15|GPIO_Pin_14|GPIO_Pin_13| GPIO_Pin_12| GPIO_Pin_10 |GPIO_Pin_11 | GPIO_Pin_8;
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_7 | GPIO_Pin_15|GPIO_Pin_14|GPIO_Pin_13| GPIO_Pin_12| GPIO_Pin_10 |GPIO_Pin_11 | GPIO_Pin_8;
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
@@ -61,10 +61,29 @@ void gpioinit()
 	GPIO_Init(GPIOE,&GPIO_InitStruct);
 
 	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_3 |GPIO_Pin_5 | GPIO_Pin_8;
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
+
+
+
+
 	GPIO_Init(GPIOB, &GPIO_InitStruct);//Camera Pins
 
 	GPIO_ResetBits(GPIOE,GPIO_Pin_15|GPIO_Pin_14|GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10 |GPIO_Pin_11 | GPIO_Pin_8);
 	GPIO_ResetBits(GPIOB,GPIO_Pin_1 | GPIO_Pin_3 |GPIO_Pin_5 | GPIO_Pin_8);
+
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_5|GPIO_Pin_2;
+		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
+		GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
+		GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+		GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
+
+		// Initialization of GPIO PORT E Pin 10, 13 and Pin 12
+		GPIO_Init(GPIOD,&GPIO_InitStruct);
+		GPIO_ResetBits(GPIOD,GPIO_Pin_5|GPIO_Pin_2);
+
 
 }
 void gpioinit1()
@@ -213,6 +232,7 @@ void shut()
 	GPIO_ResetBits(GPIOE,GPIO_Pin_15|GPIO_Pin_14|GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10|GPIO_Pin_11 | GPIO_Pin_8);
 	GPIO_ResetBits(GPIOA,GPIO_Pin_11 | GPIO_Pin_10 | GPIO_Pin_9 | GPIO_Pin_8 | GPIO_Pin_7 | GPIO_Pin_6 | GPIO_Pin_5 | GPIO_Pin_4 | GPIO_Pin_3 | GPIO_Pin_2 | GPIO_Pin_1 | GPIO_Pin_0);
 	GPIO_ResetBits(GPIOB,GPIO_Pin_1 | GPIO_Pin_3 | GPIO_Pin_5 | GPIO_Pin_8);
+	GPIO_ResetBits(GPIOD,GPIO_Pin_5|GPIO_Pin_2);
 	TIM_SetCompare1(TIM1, 0);
 	TIM_SetCompare2(TIM1, 0);
 	TIM_SetCompare1(TIM3, 0);
@@ -229,7 +249,7 @@ void Delay(int time)
 		j++;
 }
 
-void motorcode(long double x, long double y,long double gear)
+void motorcode(long double x, long double y,long double gear,char n)
 {
 	//Converting to Normal Coordinates
 	x = x - 4999.5;
@@ -295,141 +315,143 @@ void motorcode(long double x, long double y,long double gear)
 		TIM_SetCompare2(TIM1, -y);
 		TIM_SetCompare2(TIM3, -y);
 	}
+	if(n=='a')
+		{
+			GPIO_SetBits(GPIOB,GPIO_Pin_1);
+			GPIO_SetBits(GPIOB,GPIO_Pin_3);
+		}
+		else if(n=='b')
+		{
+			GPIO_SetBits(GPIOB,GPIO_Pin_1);
+			GPIO_ResetBits(GPIOB,GPIO_Pin_3);
+		}
+		else if(n=='c')
+		{
+			GPIO_SetBits(GPIOB,GPIO_Pin_5);
+			GPIO_SetBits(GPIOB,GPIO_Pin_8);
+		}
+		else if(n=='d')
+		{
+			GPIO_SetBits(GPIOB,GPIO_Pin_5);
+			GPIO_ResetBits(GPIOB,GPIO_Pin_8);
+		}
+
+		else if(n=='z')
+		{
+			GPIO_ResetBits(GPIOB,GPIO_Pin_5);
+			GPIO_ResetBits(GPIOB,GPIO_Pin_1);
+			GPIO_ResetBits(GPIOB,GPIO_Pin_3);
+			GPIO_ResetBits(GPIOB,GPIO_Pin_8);
+		}
 
 }
 void armcode(char link)
 {
 	if(link=='A')
-			{
+				{
 
-			GPIO_SetBits(GPIOA,GPIO_Pin_2); // swivel close
-			GPIO_SetBits(GPIOA,GPIO_Pin_3);
-			}
-		else if(link=='B')
-			{
-				GPIO_SetBits(GPIOA,GPIO_Pin_2); // swivel open
-				GPIO_ResetBits(GPIOA,GPIO_Pin_3);
-			}
-		else if(link=='C')
-			{
-				GPIO_SetBits(GPIOA,GPIO_Pin_8); //linear act. f
-				GPIO_SetBits(GPIOA,GPIO_Pin_9);
-			}
-		else if(link=='D')
-			{
-				GPIO_SetBits(GPIOA,GPIO_Pin_8); /// linear act. b
-				GPIO_ResetBits(GPIOA,GPIO_Pin_9);
-			}
-		else if(link=='E')
-			{
+				GPIO_SetBits(GPIOD,GPIO_Pin_2); // swivel close
+				GPIO_SetBits(GPIOD,GPIO_Pin_5);
+				}
+			else if(link=='B')
+				{
+					GPIO_SetBits(GPIOD,GPIO_Pin_2); // swivel open
+					GPIO_ResetBits(GPIOD,GPIO_Pin_5);
+				}
+			else if(link=='C')
+				{
+					GPIO_SetBits(GPIOA,GPIO_Pin_8); //linear act. f
+					GPIO_SetBits(GPIOA,GPIO_Pin_9);
+				}
+			else if(link=='D')
+				{
+					GPIO_SetBits(GPIOA,GPIO_Pin_8); /// linear act. b
+					GPIO_ResetBits(GPIOA,GPIO_Pin_9);
+				}
+			else if(link=='E')
+				{
 
-			GPIO_SetBits(GPIOE,GPIO_Pin_15); //roll b
-				GPIO_SetBits(GPIOE,GPIO_Pin_14);
+				GPIO_SetBits(GPIOE,GPIO_Pin_15); //roll b
+					GPIO_SetBits(GPIOE,GPIO_Pin_14);
 
-		         GPIO_SetBits(GPIOA,GPIO_Pin_4);
-				 GPIO_ResetBits(GPIOA,GPIO_Pin_5);
+			         GPIO_SetBits(GPIOA,GPIO_Pin_4);
+					 GPIO_ResetBits(GPIOA,GPIO_Pin_5);
 
-			}
-		else if(link=='F')
-			{
+				}
+			else if(link=='F')
+				{
 
-				GPIO_SetBits(GPIOE,GPIO_Pin_15); //roll f
-					GPIO_ResetBits(GPIOE,GPIO_Pin_14);
+					GPIO_SetBits(GPIOE,GPIO_Pin_15); //roll f
+						GPIO_ResetBits(GPIOE,GPIO_Pin_14);
+
+				         GPIO_SetBits(GPIOA,GPIO_Pin_4);
+						 GPIO_SetBits(GPIOA,GPIO_Pin_5);
+				}
+
+
+			else if(link=='G')
+				{ //gripper
+				GPIO_SetBits(GPIOA,GPIO_Pin_6);
+			 GPIO_SetBits(GPIOA,GPIO_Pin_7);
+
+
+				}
+			else if(link=='H')
+				{
+				GPIO_SetBits(GPIOA,GPIO_Pin_6);
+				 GPIO_ResetBits(GPIOA,GPIO_Pin_7);
+				}
+			else if(link=='I')
+				{
+				GPIO_SetBits(GPIOE,GPIO_Pin_15); //PITCH b
+					GPIO_SetBits(GPIOE,GPIO_Pin_14);
 
 			         GPIO_SetBits(GPIOA,GPIO_Pin_4);
 					 GPIO_SetBits(GPIOA,GPIO_Pin_5);
-			}
+
+				}
+			else if(link=='J')
+				{
+
+				GPIO_SetBits(GPIOE,GPIO_Pin_15); //PITCH b
+					GPIO_ResetBits(GPIOE,GPIO_Pin_14);
+
+			         GPIO_SetBits(GPIOA,GPIO_Pin_4);
+					 GPIO_ResetBits(GPIOA,GPIO_Pin_5);
+
+				}
 
 
-		else if(link=='G')
-			{ //gripper
-			GPIO_SetBits(GPIOA,GPIO_Pin_6);
-		 GPIO_SetBits(GPIOA,GPIO_Pin_7);
-
-
-			}
-		else if(link=='H')
-			{
-			GPIO_SetBits(GPIOA,GPIO_Pin_6);
-			 GPIO_ResetBits(GPIOA,GPIO_Pin_7);
-			}
-		else if(link=='I')
-			{
-			GPIO_SetBits(GPIOE,GPIO_Pin_15); //PITCH b
-				GPIO_SetBits(GPIOE,GPIO_Pin_14);
-
-		         GPIO_SetBits(GPIOA,GPIO_Pin_4);
-				 GPIO_SetBits(GPIOA,GPIO_Pin_5);
-
-			}
-		else if(link=='J')
-			{
-
-			GPIO_SetBits(GPIOE,GPIO_Pin_15); //PITCH b
-				GPIO_ResetBits(GPIOE,GPIO_Pin_14);
-
-		         GPIO_SetBits(GPIOA,GPIO_Pin_4);
-				 GPIO_ResetBits(GPIOA,GPIO_Pin_5);
-
-			}
-
-
-		else if(link=='K')
-				{//link 2 linear act.
-					GPIO_SetBits(GPIOA,GPIO_Pin_0);
-					GPIO_SetBits(GPIOA,GPIO_Pin_1);
+			else if(link=='K')
+					{//link 2 linear act.
+						GPIO_SetBits(GPIOA,GPIO_Pin_0);
+						GPIO_SetBits(GPIOA,GPIO_Pin_1);
+					}
+				else if(link=='L')
+					{
+						GPIO_SetBits(GPIOA,GPIO_Pin_0);
+						GPIO_ResetBits(GPIOA,GPIO_Pin_1);
+					}
+			/*else if(link=='K')
+				{
+					GPIO_SetBits(GPIOA,GPIO_Pin_10);
+					GPIO_SetBits(GPIOA,GPIO_Pin_11);
 				}
 			else if(link=='L')
 				{
-					GPIO_SetBits(GPIOA,GPIO_Pin_0);
-					GPIO_ResetBits(GPIOA,GPIO_Pin_1);
-				}
-		/*else if(link=='K')
-			{
-				GPIO_SetBits(GPIOA,GPIO_Pin_10);
-				GPIO_SetBits(GPIOA,GPIO_Pin_11);
-			}
-		else if(link=='L')
-			{
-				GPIO_SetBits(GPIOA,GPIO_Pin_10);
-				GPIO_ResetBits(GPIOA,GPIO_Pin_11);
-			}*/
-		else if(link=='M')
+					GPIO_SetBits(GPIOA,GPIO_Pin_10);
+					GPIO_ResetBits(GPIOA,GPIO_Pin_11);
+				}*/
+			else if(link=='M')
+
 			shut();
 
 }
-void camera(char n)
-{
-	if(n=='a')
-	{
-		GPIO_SetBits(GPIOB,GPIO_Pin_1);
-		GPIO_SetBits(GPIOB,GPIO_Pin_3);
-	}
-	else if(n=='b')
-	{
-		GPIO_SetBits(GPIOB,GPIO_Pin_1);
-		GPIO_ResetBits(GPIOB,GPIO_Pin_3);
-	}
-	else if(n=='c')
-	{
-		GPIO_SetBits(GPIOB,GPIO_Pin_5);
-		GPIO_SetBits(GPIOB,GPIO_Pin_8);
-	}
-	else if(n=='d')
-	{
-		GPIO_SetBits(GPIOB,GPIO_Pin_5);
-		GPIO_ResetBits(GPIOB,GPIO_Pin_8);
-	}
-	else if(n=='z')
-	{
-		shut();
-	}
 
-}
 int main(void)
 {
 	uint32_t x = 0, y = 0, gear = 0;
-	char c = ' ';
+	char c = 'k';
 	long cnt=0;
 
 	gpioinit();
@@ -447,7 +469,7 @@ int main(void)
 		{
 			cnt=0;
 			GPIO_SetBits(GPIOE, GPIO_Pin_10);
-			motorcode(x,y,gear);
+			motorcode(x,y,gear,c);
 
 			gear=uartreceive()-'0';
 			if(uartreceive()=='x')
@@ -458,23 +480,23 @@ int main(void)
 
 					{
 						//shut();
-						continue;
+						continue;if(uartreceive()=='c')
+						{
+							c=(uartreceive());
+						}
 					}
 			if(uartreceive()=='y')
 					{
 						y=(uartreceive()-'0')*1000+(uartreceive()-'0')*100+(uartreceive()-'0')*10+(uartreceive()-'0');
+						c=uartreceive();
 					}
 					{
 						//shut();
 						continue;
 					}
-			if(uartreceive()=='c')
-			{
-				c=(uartreceive());
-			}
-
-			motorcode(x,y,gear);
-			camera(c);
+			//camera(c);
+			//motorcode(x,y,gear,c);
+		//	camera(c);
 
 			}
 		else if(d=='n')
@@ -494,4 +516,4 @@ int main(void)
 
 
 	}
-	}
+}

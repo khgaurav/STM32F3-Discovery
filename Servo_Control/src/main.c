@@ -24,7 +24,7 @@ int uartreceive()
 	while(!USART_GetFlagStatus(UART4, USART_FLAG_RXNE))
 	{
 		cnt++;
-			if(cnt>2000)
+			if(cnt>20)
 				return ' ';
 	}
 	return USART_ReceiveData(UART4);
@@ -68,8 +68,8 @@ void UART_Init()
 	/* UART configuration */
 	USART_InitStructure.USART_BaudRate = 38400;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_Parity = USART_Parity_No;
+	USART_InitStructure.USART_StopBits = USART_StopBits_2;
+	USART_InitStructure.USART_Parity = USART_Parity_Even;
 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 
@@ -170,7 +170,7 @@ int main(void)
 	start:
 		TIM_SetCompare4(TIM3, min);
 		TIM_SetCompare1(TIM3, min);
-		if(uartreceive()=='s' && uartreceive()=='s')
+		if(uartreceive()=='s')
 		{
 			for(int i=min;i<max;i++)
 			{
@@ -181,6 +181,7 @@ int main(void)
 						if(uartreceive()=='f')
 						{
 							seperate(angle);
+
 							goto start;
 						}
 			}
@@ -193,6 +194,7 @@ int main(void)
 						if(uartreceive()=='f')
 						{
 							seperate(angle);
+
 							goto start;
 						}
 			}
@@ -205,6 +207,7 @@ int main(void)
 						if(uartreceive()=='f')
 						{
 							seperate(angle);
+
 							goto start;
 						}
 			}
@@ -217,6 +220,7 @@ int main(void)
 						if(uartreceive()=='f')
 						{
 							seperate(angle);
+
 							goto start;
 						}
 			}

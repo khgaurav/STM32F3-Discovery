@@ -3893,11 +3893,10 @@ LOAD /home/gauravkh/Ac6/SystemWorkbench/plugins/fr.ac6.mcu.externaltools.arm-non
                 0x00000000080016bc       0x84 src/main.o
                 0x00000000080016bc                seperate
  .text.UART_Init
-                0x0000000008001740       0x9c src/main.o
+                0x0000000008001740       0xa0 src/main.o
                 0x0000000008001740                UART_Init
- .text.pwminit  0x00000000080017dc       0xd0 src/main.o
-                0x00000000080017dc                pwminit
- *fill*         0x00000000080018ac        0x4 
+ .text.pwminit  0x00000000080017e0       0xd0 src/main.o
+                0x00000000080017e0                pwminit
  .text.main     0x00000000080018b0      0x298 src/main.o
                 0x00000000080018b0                main
  .text.SystemInit
@@ -4242,14 +4241,14 @@ OUTPUT(Servo_Control.elf elf32-littlearm)
  .debug_macro   0x0000000000001c7c       0xd8 src/main.o
  .debug_macro   0x0000000000001d54      0x19d src/system_stm32f30x.o
 
-.debug_line     0x0000000000000000     0x3a96
+.debug_line     0x0000000000000000     0x3a9e
  .debug_line    0x0000000000000000      0x750 StdPeriph_Driver/src/stm32f30x_gpio.o
  .debug_line    0x0000000000000750      0x9b7 StdPeriph_Driver/src/stm32f30x_rcc.o
  .debug_line    0x0000000000001107     0x10c1 StdPeriph_Driver/src/stm32f30x_tim.o
  .debug_line    0x00000000000021c8      0xa3e StdPeriph_Driver/src/stm32f30x_usart.o
- .debug_line    0x0000000000002c06      0x79f src/main.o
- .debug_line    0x00000000000033a5      0x676 src/system_stm32f30x.o
- .debug_line    0x0000000000003a1b       0x7b startup/startup_stm32f30x.o
+ .debug_line    0x0000000000002c06      0x7a7 src/main.o
+ .debug_line    0x00000000000033ad      0x676 src/system_stm32f30x.o
+ .debug_line    0x0000000000003a23       0x7b startup/startup_stm32f30x.o
 
 .debug_str      0x0000000000000000    0x56395
  .debug_str     0x0000000000000000    0x53d7e StdPeriph_Driver/src/stm32f30x_gpio.o

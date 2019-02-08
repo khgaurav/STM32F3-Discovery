@@ -127,12 +127,12 @@ void pwminit()
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
 
 
-	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_1 | GPIO_Pin_4;
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_1 | GPIO_Pin_0;
 
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource1, GPIO_AF_2);
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource4, GPIO_AF_2);
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource0, GPIO_AF_2);
 
 	TIM_TimeBaseStructure.TIM_Period = 20000;
 	TIM_TimeBaseStructure.TIM_Prescaler = 72;
@@ -148,7 +148,7 @@ void pwminit()
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
 
 
-	TIM_OC1Init(TIM3, &TIM_OCInitStructure);
+	TIM_OC3Init(TIM3, &TIM_OCInitStructure);
 	TIM_OC4Init(TIM3, &TIM_OCInitStructure);
 	//enable the PWM output
 
@@ -169,58 +169,54 @@ int main(void)
 	{
 	start:
 		TIM_SetCompare4(TIM3, min);
-		TIM_SetCompare1(TIM3, min);
+		TIM_SetCompare3(TIM3, min);
 		if(uartreceive()=='s')
 		{
 			for(int i=min;i<max;i++)
 			{
-				TIM_SetCompare1(TIM3, i);
-				angle=map(i,min,max,0,180);
+				TIM_SetCompare3(TIM3, i);
+				angle=map(i,min,max,0,64);
 				for(int i=0;i<200;i++)
 					//for(int i=0;i<50;i++)
 						if(uartreceive()=='f')
 						{
-							seperate(angle);
-
+							uarttransmit(angle);
 							goto start;
 						}
 			}
 			for(int i=min;i<max;i++)
 			{
-				angle=180+map(i,min,max,0,180);
+				angle=63+map(i,min,max,0,64);
 				TIM_SetCompare4(TIM3, i);
 				for(int i=0;i<200;i++)
 					//for(int i=0;i<50;i++)
 						if(uartreceive()=='f')
 						{
-							seperate(angle);
-
+							uarttransmit(angle);
 							goto start;
 						}
 			}
 			for(int i=max;i>min;i--)
 			{
-				angle=180+map(i,min,max,0,180);
+				angle=63+map(i,min,max,0,64);
 				TIM_SetCompare4(TIM3, i);
 				for(int i=0;i<200;i++)
 					//for(int i=0;i<50;i++)
 						if(uartreceive()=='f')
 						{
-							seperate(angle);
-
+							uarttransmit(angle);
 							goto start;
 						}
 			}
 			for(int i=max;i>min;i--)
 			{
-				angle=map(i,min,max,0,180);
-				TIM_SetCompare1(TIM3, i);
+				angle=map(i,min,max,0,64);
+				TIM_SetCompare3(TIM3, i);
 				for(int i=0;i<200;i++)
 					//for(int i=0;i<50;i++)
 						if(uartreceive()=='f')
 						{
-							seperate(angle);
-
+							uarttransmit(angle);
 							goto start;
 						}
 			}

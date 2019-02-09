@@ -481,10 +481,7 @@ int main(void)
 
 					{
 						//shut();
-						continue;if(uartreceive()=='c')
-						{
-							c=(uartreceive());
-						}
+						continue;
 					}
 			if(uartreceive()=='y')
 					{

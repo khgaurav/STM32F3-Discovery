@@ -9,7 +9,7 @@ int uartreceive()
 	while(!USART_GetFlagStatus(UART4, USART_FLAG_RXNE))
 	{
 		cnt++;
-		if(cnt>20000)
+		if(cnt>10000)
 			return ' ';
 	}
 	return USART_ReceiveData(UART4);
@@ -298,6 +298,8 @@ void shut()
 	TIM_SetCompare2(TIM1, 0);
 	TIM_SetCompare1(TIM3, 0);
 	TIM_SetCompare2(TIM3, 0);
+	TIM_SetCompare3(TIM3, 400);
+	TIM_SetCompare4(TIM3, 400);
 
 }
 
@@ -518,7 +520,7 @@ void servo(void)
 			{
 				TIM_SetCompare3(TIM3, i);
 				angle=map(i,min,max,0,64);
-				for(int i=0;i<20;i++)
+				//for(int i=0;i<2;i++)
 					//for(int i=0;i<50;i++)
 					{
 						char ch=uartreceive();
@@ -536,7 +538,7 @@ void servo(void)
 			{
 				angle=63+map(i,min,max,0,64);
 				TIM_SetCompare4(TIM3, i);
-				for(int i=0;i<20;i++)
+				//for(int i=0;i<2;i++)
 					//for(int i=0;i<50;i++)
 				{
 					char ch=uartreceive();
@@ -554,7 +556,7 @@ void servo(void)
 			{
 				angle=63+map(i,min,max,0,64);
 				TIM_SetCompare4(TIM3, i);
-				for(int i=0;i<20;i++)
+				//for(int i=0;i<2;i++)
 					//for(int i=0;i<50;i++)
 				{
 					char ch=uartreceive();
@@ -572,7 +574,7 @@ void servo(void)
 			{
 				angle=map(i,min,max,0,64);
 				TIM_SetCompare3(TIM3, i);
-				for(int i=0;i<20;i++)
+				//for(int i=0;i<2;i++)
 					//for(int i=0;i<50;i++)
 				{
 					char ch=uartreceive();

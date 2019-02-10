@@ -9,7 +9,7 @@ int uartreceive()
 	while(!USART_GetFlagStatus(UART4, USART_FLAG_RXNE))
 	{
 		cnt++;
-		if(cnt>10000)
+		if(cnt>20000)
 			return ' ';
 	}
 	return USART_ReceiveData(UART4);
@@ -18,8 +18,9 @@ int uartreceive()
 void uarttransmit(char data)
 {
 	USART_SendData(UART4,data);
-	        while(USART_GetFlagStatus(UART4,USART_FLAG_TXE)==RESET)
-	        {}
+	        while(USART_GetFlagStatus(UART4,USART_FLAG_TXE)==RESET);
+
+
 }
 //Map function
 long double map(long double x, long double in_min, long double in_max, long double out_min, long double out_max)
@@ -232,7 +233,7 @@ void pwminitservo()
 	TIM_Cmd(TIM3, ENABLE);
 
 	TIM_SetCompare4(TIM3, 400);
-	TIM_SetCompare1(TIM3, 400);
+	TIM_SetCompare3(TIM3, 400);
 
 }
 
@@ -378,7 +379,7 @@ void motorcode(long double x, long double y,long double gear,char n)
 		TIM_SetCompare2(TIM1, -y);
 		TIM_SetCompare2(TIM3, -y);
 	}
-	if(n=='a')
+	/*if(n=='a')
 		{
 			GPIO_SetBits(GPIOB,GPIO_Pin_1);
 			GPIO_SetBits(GPIOB,GPIO_Pin_3);
@@ -405,7 +406,7 @@ void motorcode(long double x, long double y,long double gear,char n)
 			GPIO_ResetBits(GPIOB,GPIO_Pin_1);
 			GPIO_ResetBits(GPIOB,GPIO_Pin_3);
 			GPIO_ResetBits(GPIOB,GPIO_Pin_8);
-		}
+		}*/
 
 }
 void armcode(char link)
@@ -516,10 +517,10 @@ void servo(void)
 
 		TIM_SetCompare4(TIM3, min);
 		TIM_SetCompare3(TIM3, min);
-			for(int i=min;i<max;i++)
+			for(int i=min;i<max;i+=2)
 			{
 				TIM_SetCompare3(TIM3, i);
-				angle=map(i,min,max,0,64);
+				angle=map(i,min,max,0,63);
 				//for(int i=0;i<2;i++)
 					//for(int i=0;i<50;i++)
 					{
@@ -534,9 +535,9 @@ void servo(void)
 							goto start;
 					}
 			}
-			for(int i=min;i<max;i++)
+			for(int i=min;i<max;i+=2)
 			{
-				angle=63+map(i,min,max,0,64);
+				angle=63+map(i,min,max,0,63);
 				TIM_SetCompare4(TIM3, i);
 				//for(int i=0;i<2;i++)
 					//for(int i=0;i<50;i++)
@@ -552,9 +553,9 @@ void servo(void)
 						goto start;
 				}
 			}
-			for(int i=max;i>min;i--)
+			for(int i=max;i>min;i-=2)
 			{
-				angle=63+map(i,min,max,0,64);
+				angle=63+map(i,min,max,0,63);
 				TIM_SetCompare4(TIM3, i);
 				//for(int i=0;i<2;i++)
 					//for(int i=0;i<50;i++)
@@ -570,9 +571,9 @@ void servo(void)
 						goto start;
 				}
 			}
-			for(int i=max;i>min;i--)
+			for(int i=max;i>min;i-=2)
 			{
-				angle=map(i,min,max,0,64);
+				angle=map(i,min,max,0,63);
 				TIM_SetCompare3(TIM3, i);
 				//for(int i=0;i<2;i++)
 					//for(int i=0;i<50;i++)
@@ -588,6 +589,7 @@ void servo(void)
 							goto start;
 				}
 			}
+			uarttransmit(127);
 			start:
 
 			TIM_SetCompare4(TIM3, min);
@@ -649,15 +651,12 @@ int main(void)
 			}
 		else if(d=='n')
 		{
-			cnt=0;
-			GPIO_SetBits(GPIOE,GPIO_Pin_8);
-			armcode(uartreceive());
-
-			continue;
+			shut();
 		}
 		else if(d=='s')
 		{
-			shut();
+			TIM_SetCompare4(TIM3, 400);
+			TIM_SetCompare3(TIM3, 400);
 			servo();
 		}
 		else if(d==' ')

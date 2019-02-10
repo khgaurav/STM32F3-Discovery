@@ -226,21 +226,21 @@ void UART_Init()
 	// Enable UART
 	USART_Cmd(UART4, ENABLE);
 }
-void shut()
+void shutmotorcode()
 {
-
-
-	GPIO_ResetBits(GPIOE,GPIO_Pin_15|GPIO_Pin_14|GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10|GPIO_Pin_11 | GPIO_Pin_8);
-	GPIO_ResetBits(GPIOA,GPIO_Pin_11 | GPIO_Pin_10 | GPIO_Pin_9 | GPIO_Pin_8 | GPIO_Pin_7 | GPIO_Pin_6 | GPIO_Pin_5 | GPIO_Pin_4 | GPIO_Pin_3 | GPIO_Pin_2 | GPIO_Pin_1 | GPIO_Pin_0);
 	GPIO_ResetBits(GPIOB,GPIO_Pin_1 | GPIO_Pin_3 | GPIO_Pin_5 | GPIO_Pin_8);
-	GPIO_ResetBits(GPIOD,GPIO_Pin_5|GPIO_Pin_2);
+	GPIO_ResetBits(GPIOE,GPIO_Pin_15|GPIO_Pin_14|GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10|GPIO_Pin_11 | GPIO_Pin_8);
 	TIM_SetCompare1(TIM1, 0);
 	TIM_SetCompare2(TIM1, 0);
 	TIM_SetCompare1(TIM3, 0);
 	TIM_SetCompare2(TIM3, 0);
 
 }
-
+void shutarm()
+{
+	GPIO_ResetBits(GPIOA,GPIO_Pin_11 | GPIO_Pin_10 | GPIO_Pin_9 | GPIO_Pin_8 | GPIO_Pin_7 | GPIO_Pin_6 | GPIO_Pin_5 | GPIO_Pin_4 | GPIO_Pin_3 | GPIO_Pin_2 | GPIO_Pin_1 | GPIO_Pin_0);
+	GPIO_ResetBits(GPIOD,GPIO_Pin_5|GPIO_Pin_2);
+}
 void Delay(int time)
 {
 	volatile int i,j;
@@ -317,33 +317,32 @@ void motorcode(long double x, long double y,long double gear,char n)
 		TIM_SetCompare2(TIM3, -y);
 	}
 	if(n=='a')
-		{
-			GPIO_SetBits(GPIOB,GPIO_Pin_1);
-			GPIO_SetBits(GPIOB,GPIO_Pin_3);
-		}
-		else if(n=='b')
-		{
-			GPIO_SetBits(GPIOB,GPIO_Pin_1);
-			GPIO_ResetBits(GPIOB,GPIO_Pin_3);
-		}
-		else if(n=='c')
-		{
-			GPIO_SetBits(GPIOB,GPIO_Pin_5);
-			GPIO_SetBits(GPIOB,GPIO_Pin_8);
-		}
-		else if(n=='d')
-		{
-			GPIO_SetBits(GPIOB,GPIO_Pin_5);
-			GPIO_ResetBits(GPIOB,GPIO_Pin_8);
-		}
-
-		else if(n=='z')
-		{
-			GPIO_ResetBits(GPIOB,GPIO_Pin_5);
-			GPIO_ResetBits(GPIOB,GPIO_Pin_1);
-			GPIO_ResetBits(GPIOB,GPIO_Pin_3);
-			GPIO_ResetBits(GPIOB,GPIO_Pin_8);
-		}
+	{
+		GPIO_SetBits(GPIOB,GPIO_Pin_1);
+		GPIO_SetBits(GPIOB,GPIO_Pin_3);
+	}
+	else if(n=='b')
+	{
+		GPIO_SetBits(GPIOB,GPIO_Pin_1);
+		GPIO_ResetBits(GPIOB,GPIO_Pin_3);
+	}
+	else if(n=='c')
+	{
+		GPIO_SetBits(GPIOB,GPIO_Pin_5);
+		GPIO_SetBits(GPIOB,GPIO_Pin_8);
+	}
+	else if(n=='d')
+	{
+		GPIO_SetBits(GPIOB,GPIO_Pin_5);
+		GPIO_ResetBits(GPIOB,GPIO_Pin_8);
+	}
+	else if(n=='z')
+	{
+		GPIO_ResetBits(GPIOB,GPIO_Pin_5);
+		GPIO_ResetBits(GPIOB,GPIO_Pin_1);
+		GPIO_ResetBits(GPIOB,GPIO_Pin_3);
+		GPIO_ResetBits(GPIOB,GPIO_Pin_8);
+	}
 
 }
 void armcode(char link)
@@ -428,7 +427,7 @@ void armcode(char link)
 						GPIO_SetBits(GPIOA,GPIO_Pin_0);
 						GPIO_SetBits(GPIOA,GPIO_Pin_1);
 					}
-				else if(link=='L')
+			else if(link=='L')
 					{
 						GPIO_SetBits(GPIOA,GPIO_Pin_0);
 						GPIO_ResetBits(GPIOA,GPIO_Pin_1);
@@ -445,7 +444,7 @@ void armcode(char link)
 				}*/
 			else if(link=='M')
 
-			shut();
+			shutarm();
 
 }
 
@@ -459,19 +458,31 @@ int main(void)
 	gpioinit1();
 	pwminit();
 	UART_Init();
-	shut();
+	shutarm();
+	shutmotorcode();
 	while(1)
 	{
 		if(cnt>200)
-			shut();
+		{
+			shutmotorcode();
+			shutarm();
+		}
 		char d=uartreceive();
+		if(d=='w')
+		{
+			do
+			{
+				d=uartreceive();
+				goto arm;
+			}while(d!='m');
+
+		}
+
 		if(d=='m')
 
 		{
 			cnt=0;
 			GPIO_SetBits(GPIOE, GPIO_Pin_10);
-			motorcode(x,y,gear,c);
-
 			gear=uartreceive()-'0';
 			if(uartreceive()=='x')
 					{
@@ -480,7 +491,7 @@ int main(void)
 			else
 
 					{
-						//shut();
+						//shutmotorcode();
 						continue;
 					}
 			if(uartreceive()=='y')
@@ -489,7 +500,7 @@ int main(void)
 						c=uartreceive();
 					}
 					{
-						//shut();
+						//shutmotorcode();
 						continue;
 					}
 			//camera(c);
@@ -497,7 +508,8 @@ int main(void)
 		//	camera(c);
 
 			}
-		else if(d=='n')
+		arm:
+		if(d=='n')
 		{
 			cnt=0;
 			GPIO_SetBits(GPIOE,GPIO_Pin_8);

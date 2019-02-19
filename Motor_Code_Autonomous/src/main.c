@@ -14,7 +14,6 @@ int uartreceive()
 	}
 	return USART_ReceiveData(UART4);
 }
-
 void uarttransmit(char data)
 {
 	USART_SendData(UART4,data);
@@ -22,6 +21,8 @@ void uarttransmit(char data)
 
 
 }
+
+
 //Map function
 long double map(long double x, long double in_min, long double in_max, long double out_min, long double out_max)
 {
@@ -68,19 +69,8 @@ void gpioinit()
 	// Initialization of GPIO PORT E Pin 10, 13 and Pin 12
 	GPIO_Init(GPIOE,&GPIO_InitStruct);
 
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_3 |GPIO_Pin_5 | GPIO_Pin_8;
-	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;
+		GPIO_ResetBits(GPIOE,GPIO_Pin_15|GPIO_Pin_14|GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10 |GPIO_Pin_11 | GPIO_Pin_8);
 
-
-
-
-	GPIO_Init(GPIOB, &GPIO_InitStruct);//Camera Pins
-
-	GPIO_ResetBits(GPIOE,GPIO_Pin_15|GPIO_Pin_14|GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10 |GPIO_Pin_11 | GPIO_Pin_8);
-	GPIO_ResetBits(GPIOB,GPIO_Pin_1 | GPIO_Pin_3 |GPIO_Pin_5 | GPIO_Pin_8);
 
 	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_5|GPIO_Pin_2;
 		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
@@ -181,7 +171,6 @@ void pwminit()
 	TIM_SetCompare2(TIM3, 0);
 
 }
-
 void pwminitservo()
 {
 	//structure for GPIO setup
@@ -192,10 +181,10 @@ void pwminitservo()
 	TIM_OCInitTypeDef			TIM_OCInitStructure;
 
 	//enable the AHB Peripheral Clock to use GPIOE
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOD, ENABLE);
 	//enable the TIM1 and 3 clock
 
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
 	// Pin configuration of PWM
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
@@ -204,12 +193,12 @@ void pwminitservo()
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
 
 
-	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_1 | GPIO_Pin_0;
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_6 | GPIO_Pin_7;
 
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
+	GPIO_Init(GPIOD, &GPIO_InitStructure);
 
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource1, GPIO_AF_2);
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource0, GPIO_AF_2);
+	GPIO_PinAFConfig(GPIOD, GPIO_PinSource7, GPIO_AF_2);
+	GPIO_PinAFConfig(GPIOD, GPIO_PinSource6, GPIO_AF_2);
 
 	TIM_TimeBaseStructure.TIM_Period = 20000;
 	TIM_TimeBaseStructure.TIM_Prescaler = 72;
@@ -217,7 +206,7 @@ void pwminitservo()
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
 
-	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);//For GPIOB 1,4
+	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);//For GPIOB 1,4
 
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
@@ -225,18 +214,17 @@ void pwminitservo()
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
 
 
-	TIM_OC3Init(TIM3, &TIM_OCInitStructure);
-	TIM_OC4Init(TIM3, &TIM_OCInitStructure);
+	TIM_OC3Init(TIM2, &TIM_OCInitStructure);
+	TIM_OC4Init(TIM2, &TIM_OCInitStructure);
 	//enable the PWM output
 
-	TIM_CtrlPWMOutputs(TIM3, ENABLE);
-	TIM_Cmd(TIM3, ENABLE);
+	TIM_CtrlPWMOutputs(TIM2, ENABLE);
+	TIM_Cmd(TIM2, ENABLE);
 
-	TIM_SetCompare4(TIM3, 400);
-	TIM_SetCompare3(TIM3, 400);
+	TIM_SetCompare4(TIM2, 400);
+	TIM_SetCompare3(TIM2, 400);
 
 }
-
 
 void UART_Init()
 {
@@ -291,16 +279,15 @@ void UART_Init()
 }
 void shut()
 {
+
+
 	GPIO_ResetBits(GPIOE,GPIO_Pin_15|GPIO_Pin_14|GPIO_Pin_13 | GPIO_Pin_12 | GPIO_Pin_10|GPIO_Pin_11 | GPIO_Pin_8);
-	GPIO_ResetBits(GPIOA,GPIO_Pin_11 | GPIO_Pin_10 | GPIO_Pin_9 | GPIO_Pin_8 | GPIO_Pin_7 | GPIO_Pin_6 | GPIO_Pin_5 | GPIO_Pin_4 | GPIO_Pin_3 | GPIO_Pin_2 | GPIO_Pin_1 | GPIO_Pin_0);
-	GPIO_ResetBits(GPIOB,GPIO_Pin_1 | GPIO_Pin_3 | GPIO_Pin_5 | GPIO_Pin_8);
-	GPIO_ResetBits(GPIOD,GPIO_Pin_5|GPIO_Pin_2);
+	GPIO_ResetBits(GPIOA,GPIO_Pin_11 | GPIO_Pin_10 | GPIO_Pin_9 | GPIO_Pin_8 | GPIO_Pin_7 | GPIO_Pin_6 | GPIO_Pin_5 | GPIO_Pin_4 | GPIO_Pin_3 | GPIO_Pin_2 | GPIO_Pin_1 | GPIO_Pin_0);	GPIO_ResetBits(GPIOB,GPIO_Pin_1 | GPIO_Pin_3 | GPIO_Pin_5 | GPIO_Pin_8);
+	GPIO_ResetBits(GPIOD,GPIO_Pin_5);
 	TIM_SetCompare1(TIM1, 0);
 	TIM_SetCompare2(TIM1, 0);
 	TIM_SetCompare1(TIM3, 0);
 	TIM_SetCompare2(TIM3, 0);
-	TIM_SetCompare3(TIM3, 400);
-	TIM_SetCompare4(TIM3, 400);
 
 }
 
@@ -379,34 +366,6 @@ void motorcode(long double x, long double y,long double gear,char n)
 		TIM_SetCompare2(TIM1, -y);
 		TIM_SetCompare2(TIM3, -y);
 	}
-	/*if(n=='a')
-		{
-			GPIO_SetBits(GPIOB,GPIO_Pin_1);
-			GPIO_SetBits(GPIOB,GPIO_Pin_3);
-		}
-		else if(n=='b')
-		{
-			GPIO_SetBits(GPIOB,GPIO_Pin_1);
-			GPIO_ResetBits(GPIOB,GPIO_Pin_3);
-		}
-		else if(n=='c')
-		{
-			GPIO_SetBits(GPIOB,GPIO_Pin_5);
-			GPIO_SetBits(GPIOB,GPIO_Pin_8);
-		}
-		else if(n=='d')
-		{
-			GPIO_SetBits(GPIOB,GPIO_Pin_5);
-			GPIO_ResetBits(GPIOB,GPIO_Pin_8);
-		}
-
-		else if(n=='z')
-		{
-			GPIO_ResetBits(GPIOB,GPIO_Pin_5);
-			GPIO_ResetBits(GPIOB,GPIO_Pin_1);
-			GPIO_ResetBits(GPIOB,GPIO_Pin_3);
-			GPIO_ResetBits(GPIOB,GPIO_Pin_8);
-		}*/
 
 }
 void armcode(char link)
@@ -515,11 +474,11 @@ void servo(void)
 {
 	int min=410,max=2490,angle=0;
 
-		TIM_SetCompare4(TIM3, min);
-		TIM_SetCompare3(TIM3, min);
+		TIM_SetCompare4(TIM2, min);
+		TIM_SetCompare3(TIM2, min);
 			for(int i=min;i<max;i+=2)
 			{
-				TIM_SetCompare3(TIM3, i);
+				TIM_SetCompare3(TIM2, i);
 				angle=map(i,min,max,0,63);
 				//for(int i=0;i<2;i++)
 					//for(int i=0;i<50;i++)
@@ -529,6 +488,8 @@ void servo(void)
 
 							{
 								uarttransmit(angle);
+								GPIO_SetBits(GPIOD,GPIO_Pin_2); // swivel close
+								GPIO_SetBits(GPIOD,GPIO_Pin_5);
 								goto start;
 							}
 						else if(ch=='m')
@@ -538,7 +499,7 @@ void servo(void)
 			for(int i=min;i<max;i+=2)
 			{
 				angle=63+map(i,min,max,0,63);
-				TIM_SetCompare4(TIM3, i);
+				TIM_SetCompare4(TIM2, i);
 				//for(int i=0;i<2;i++)
 					//for(int i=0;i<50;i++)
 				{
@@ -547,6 +508,8 @@ void servo(void)
 
 						{
 							uarttransmit(angle);
+							GPIO_SetBits(GPIOD,GPIO_Pin_2); // swivel close
+							GPIO_ResetBits(GPIOD,GPIO_Pin_5);
 							goto start;
 						}
 					else if(ch=='m')
@@ -556,7 +519,7 @@ void servo(void)
 			for(int i=max;i>min;i-=2)
 			{
 				angle=63+map(i,min,max,0,63);
-				TIM_SetCompare4(TIM3, i);
+				TIM_SetCompare4(TIM2, i);
 				//for(int i=0;i<2;i++)
 					//for(int i=0;i<50;i++)
 				{
@@ -565,6 +528,8 @@ void servo(void)
 
 						{
 							uarttransmit(angle);
+							GPIO_SetBits(GPIOD,GPIO_Pin_2); // swivel close
+							GPIO_ResetBits(GPIOD,GPIO_Pin_5);
 							goto start;
 						}
 					else if(ch=='m')
@@ -574,7 +539,7 @@ void servo(void)
 			for(int i=max;i>min;i-=2)
 			{
 				angle=map(i,min,max,0,63);
-				TIM_SetCompare3(TIM3, i);
+				TIM_SetCompare3(TIM2, i);
 				//for(int i=0;i<2;i++)
 					//for(int i=0;i<50;i++)
 				{
@@ -583,6 +548,8 @@ void servo(void)
 
 						{
 							uarttransmit(angle);
+							GPIO_SetBits(GPIOD,GPIO_Pin_2); // swivel close
+							GPIO_ResetBits(GPIOD,GPIO_Pin_5);
 							goto start;
 						}
 					else if(ch=='m')
@@ -591,9 +558,11 @@ void servo(void)
 			}
 			uarttransmit(127);
 			start:
-
-			TIM_SetCompare4(TIM3, min);
-			TIM_SetCompare3(TIM3, min);
+			for(int i=0;i<6000;i++)
+				for(int j=0;j<5000;j++);
+			GPIO_ResetBits(GPIOD,GPIO_Pin_2);
+			TIM_SetCompare4(TIM2, min);
+			TIM_SetCompare3(TIM2, min);
 
 		}
 
@@ -608,7 +577,10 @@ int main(void)
 	pwminit();
 	pwminitservo();
 	UART_Init();
+
 	shut();
+
+
 	while(1)
 	{
 		if(cnt>200)
@@ -630,10 +602,7 @@ int main(void)
 
 					{
 						//shut();
-						continue;if(uartreceive()=='c')
-						{
-							c=(uartreceive());
-						}
+						continue;
 					}
 			if(uartreceive()=='y')
 					{
@@ -649,16 +618,13 @@ int main(void)
 		//	camera(c);
 
 			}
-		else if(d=='n')
-		{
-			shut();
-		}
 		else if(d=='s')
-		{
-			TIM_SetCompare4(TIM3, 400);
-			TIM_SetCompare3(TIM3, 400);
-			servo();
-		}
+				{
+					TIM_SetCompare4(TIM2, 400);
+					TIM_SetCompare3(TIM2, 400);
+					servo();
+				}
+
 		else if(d==' ')
 		{
 			cnt++;

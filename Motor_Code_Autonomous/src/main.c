@@ -193,10 +193,11 @@ void pwminitservo()
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
 
 
-	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_6 | GPIO_Pin_7;
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_4 | GPIO_Pin_6 | GPIO_Pin_7;
 
 	GPIO_Init(GPIOD, &GPIO_InitStructure);
 
+	GPIO_PinAFConfig(GPIOD, GPIO_PinSource4, GPIO_AF_2);
 	GPIO_PinAFConfig(GPIOD, GPIO_PinSource7, GPIO_AF_2);
 	GPIO_PinAFConfig(GPIOD, GPIO_PinSource6, GPIO_AF_2);
 
@@ -206,14 +207,14 @@ void pwminitservo()
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
 
-	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);//For GPIOB 1,4
+	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
 
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
 	TIM_OCInitStructure.TIM_Pulse = 1500;
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
 
-
+	TIM_OC2Init(TIM2, &TIM_OCInitStructure);
 	TIM_OC3Init(TIM2, &TIM_OCInitStructure);
 	TIM_OC4Init(TIM2, &TIM_OCInitStructure);
 	//enable the PWM output
@@ -223,6 +224,7 @@ void pwminitservo()
 
 	TIM_SetCompare4(TIM2, 400);
 	TIM_SetCompare3(TIM2, 400);
+	TIM_SetCompare2(TIM2, 400);
 
 }
 
@@ -488,8 +490,7 @@ void servo(void)
 
 							{
 								uarttransmit(angle);
-								GPIO_SetBits(GPIOD,GPIO_Pin_2); // swivel close
-								GPIO_SetBits(GPIOD,GPIO_Pin_5);
+								GPIO_SetBits(GPIOD,GPIO_Pin_2);
 								goto start;
 							}
 						else if(ch=='m')
@@ -508,8 +509,7 @@ void servo(void)
 
 						{
 							uarttransmit(angle);
-							GPIO_SetBits(GPIOD,GPIO_Pin_2); // swivel close
-							GPIO_ResetBits(GPIOD,GPIO_Pin_5);
+							GPIO_SetBits(GPIOD,GPIO_Pin_2);
 							goto start;
 						}
 					else if(ch=='m')
@@ -528,8 +528,7 @@ void servo(void)
 
 						{
 							uarttransmit(angle);
-							GPIO_SetBits(GPIOD,GPIO_Pin_2); // swivel close
-							GPIO_ResetBits(GPIOD,GPIO_Pin_5);
+							GPIO_SetBits(GPIOD,GPIO_Pin_2);
 							goto start;
 						}
 					else if(ch=='m')
@@ -548,8 +547,8 @@ void servo(void)
 
 						{
 							uarttransmit(angle);
-							GPIO_SetBits(GPIOD,GPIO_Pin_2); // swivel close
-							GPIO_ResetBits(GPIOD,GPIO_Pin_5);
+							GPIO_SetBits(GPIOD,GPIO_Pin_2);
+
 							goto start;
 						}
 					else if(ch=='m')
@@ -579,12 +578,16 @@ int main(void)
 	UART_Init();
 
 	shut();
+	double angle=400.0,a=20;
+	TIM_SetCompare2(TIM2, 400);
 
 
 	while(1)
 	{
 		if(cnt>200)
 			shut();
+		TIM_SetCompare2(TIM2, (int)angle);
+
 		char d=uartreceive();
 		if(d=='m')
 
@@ -592,7 +595,7 @@ int main(void)
 			cnt=0;
 			GPIO_SetBits(GPIOE, GPIO_Pin_10);
 			motorcode(x,y,gear,c);
-
+			uarttransmit('.');
 			gear=uartreceive()-'0';
 			if(uartreceive()=='x')
 					{
@@ -602,7 +605,7 @@ int main(void)
 
 					{
 						//shut();
-						continue;
+						//continue;
 					}
 			if(uartreceive()=='y')
 					{
@@ -611,7 +614,7 @@ int main(void)
 					}
 					{
 						//shut();
-						continue;
+						//continue;
 					}
 			//camera(c);
 			//motorcode(x,y,gear,c);
@@ -628,9 +631,23 @@ int main(void)
 		else if(d==' ')
 		{
 			cnt++;
-			continue;
+
 		}
 
+		angle+=a;
+
+		if(angle>=2000.0)
+		{
+			a=-a;
+			for(int i=0;i<10;i++)
+				uarttransmit('e');
+		}
+		else if(angle<=400)
+		{
+			a=-a;
+			for(int i=0;i<10;i++)
+				uarttransmit('s');
+		}
 
 
 	}

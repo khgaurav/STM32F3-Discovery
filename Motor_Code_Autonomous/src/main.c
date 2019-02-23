@@ -587,7 +587,7 @@ int main(void)
 		if(cnt>200)
 			shut();
 		TIM_SetCompare2(TIM2, (int)angle);
-
+		uarttransmit(map(angle,410,2490,0,127));
 		char d=uartreceive();
 		if(d=='m')
 
@@ -595,7 +595,7 @@ int main(void)
 			cnt=0;
 			GPIO_SetBits(GPIOE, GPIO_Pin_10);
 			motorcode(x,y,gear,c);
-			uarttransmit('.');
+			//uarttransmit('.');
 			gear=uartreceive()-'0';
 			if(uartreceive()=='x')
 					{
@@ -636,17 +636,15 @@ int main(void)
 
 		angle+=a;
 
-		if(angle>=2000.0)
+		if(angle>=2490.0)
 		{
 			a=-a;
-			for(int i=0;i<10;i++)
-				uarttransmit('e');
+
 		}
-		else if(angle<=400)
+		else if(angle<=410)
 		{
 			a=-a;
-			for(int i=0;i<10;i++)
-				uarttransmit('s');
+
 		}
 
 

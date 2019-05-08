@@ -1,149 +1,128 @@
 #include "stm32f30x.h"
-#include "stm32f30x_rcc.h"
-#include "stm32f30x_adc.h"
-#include <stm32f30x_gpio.h>
+#include "stm32f3_discovery.h"
+#include "math.h"
+#define ARRAY_SIZE 32
 
-#define LED (GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15)
+/**
+ * Classic delay
+ */
+void badprogDelay(u32 myTime) {
+    u32 i;
+    RCC_ClocksTypeDef RCC_Clocks;
 
-uint16_t convertedValue= 0;
+    RCC_GetClocksFreq(&RCC_Clocks);
+    // i = myTime * 68
+    i = myTime * (RCC_Clocks.SYSCLK_Frequency >> 20);
 
-void delay_ms (int time)
-{
-    int i;
-    for (i = 0; i < time * 4000; i++) {}
-}
-int uartreceive()
-{
-	int cnt=0;
-	//Waiting for register to update
-	while(!USART_GetFlagStatus(UART4, USART_FLAG_RXNE))
-	{
-		cnt++;
-		if(cnt>20000)
-			return ' ';
-	}
-	return USART_ReceiveData(UART4);
-}
-void uarttransmit(uint16_t data)
-{
-	//Waiting for register to update
-	while(!USART_GetFlagStatus(UART4, USART_FLAG_TXE));
-	USART_SendData(UART4,data);
+    for (; i != 0; i--)
+        ;
 }
 
-
-
-
-void UART_Init()
-{
-
-	USART_InitTypeDef USART_InitStructure;
-	GPIO_InitTypeDef GPIO_InitStructure;
-
-	// Enable GPIO clock
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
-
-	// Enable UART clock
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
-
-	/* UART configuration */
-	USART_InitStructure.USART_BaudRate = 38400;
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_Parity = USART_Parity_No;
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-
-	/* UART4 configured as follow:
-					- BaudRate = speed parameter above
-					- Word Length = 8 Bits
-					- One Stop Bit
-					- No parity
-					- Hardware flow control disabled (RTS and CTS signals)
-					- Receive and transmit enabled
-	*/
-	USART_Init(UART4, &USART_InitStructure);
-
-	// Configure UART Tx as alternate function push-pull
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-	GPIO_Init(GPIOC, &GPIO_InitStructure);
-
-	// Configure UART Rx as alternate function push-pull
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
-	GPIO_Init(GPIOC, &GPIO_InitStructure);
-
-	// Connect PC10 to UART4_Tx
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource10, GPIO_AF_5);
-
-	// Connect PC11 to UART4_Rx
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource11, GPIO_AF_5);
-
-	// Enable UART
-	USART_Cmd(UART4, ENABLE);
-}
-
-void Configure_ADC(void)
-{
-    RCC_ADCCLKConfig(RCC_ADC12PLLCLK_Div2);
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_ADC12,ENABLE);
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
-
+/**
+ * Initialization of ADC and the poentiomenter's GPIO
+ */
+float badprogADC() {
+    /// declaring GPIO stuff
     GPIO_InitTypeDef GPIO_InitStructure;
-    GPIO_StructInit(&GPIO_InitStructure);
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AN;
-    GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_1;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-    GPIO_Init(GPIOA,&GPIO_InitStructure);
-
-    ADC_DeInit(ADC1);
+    // declaring ADC struct
     ADC_InitTypeDef ADC_InitStructure;
-    ADC_InitStructure.ADC_Resolution = ADC_Resolution_10b;
+
+    // deinit ADC
+    ADC_DeInit(ADC1);
+
+    // enabling clock
+    RCC_APB2PeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
+    // enabling ADC clock
+    RCC_APB2PeriphClockCmd(RCC_AHBPeriph_ADC12, ENABLE);
+
+    // C - Init the GPIO with the structure - Testing ADC
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AN;
+    GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+    // init ADC struct
+    ADC_StructInit(&ADC_InitStructure);
+
+    // setting the ADC struct
+    ADC_InitStructure.ADC_AutoInjMode = ADC_Mode_Independent;
+    ADC_InitStructure.ADC_ = DISABLE;
+    ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
+    ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
     ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-    ADC_InitStructure.ADC_ExternalTrigConvEvent = ADC_ExternalTrigConvEvent_0;
-    ADC_InitStructure.ADC_NbrOfRegChannel = 1;
-    ADC_InitStructure.ADC_ExternalTrigEventEdge = ADC_ExternalTrigEventEdge_None;
-    ADC_InitStructure.ADC_ContinuousConvMode = ADC_ContinuousConvMode_Enable;
-    ADC_Init(ADC1,&ADC_InitStructure);
+    ADC_InitStructure.ADC_NbrOfChannel = 1;
+
+    // init adc
+    ADC_Init(ADC1, &ADC_InitStructure);
+
+    // enable ADC
     ADC_Cmd(ADC1, ENABLE);
+
+    // start ADC1 calibration and check the end
+    ADC_StartCalibration(ADC1);
+
+    // configure ADC_IN14
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_14, 1, ADC_SampleTime_7Cycles5);
+
+    // start ADC -> retrieve the ADC value from the potentiometer
+    // and add it into ADC1->DR with:
+    // ADCx->CR2 |= CR2_EXTTRIG_SWSTART_Set;
+    // this without using ADC1->DR o_O
+    // CR2 = Configuration Register2 -> it seems to be a config with
+    // a binary number -> for example 1000010100101010 which sets all
+    // registers with default values
+    ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+
+    // check the end of the ADC1 calibration
+    // setting ADC1->DR with:
+    // if ((ADCx->CR2 & CR2_CAL_Set) != (uint32_t)RESET)
+    while (ADC_GetCalibrationStatus(ADC1) == SET)
+        ;
+
+    // convert valueADC to valueVolt -> valueADC * (MAX VOLT / 2^12)
+    // and also :
+    // ADC_SoftwareStartConvCmdsoftwareS,
+    // ADC_GetCalibrationStatus
+    // with
+    // return (uint16_t) ADCx->DR;
+    uint16_t valueADC = ADC_GetConversionValue(ADC1);
+
+    // convert the "uint_16 valueADC" into a "float valueVolt"
+    // Volt = 3.3
+    // ADC = 12 bits, so 2^12 = 4096
+    float valueVolt = valueADC * (3.3 / 4095);
+
+    return valueVolt;
 }
 
-uint16_t Read_ADC()
-{
-    while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_RDY));
-    ADC_RegularChannelConfig(ADC1,ADC_Channel_2, 1,    ADC_SampleTime_1Cycles5);
-    ADC_StartConversion(ADC1);
-    while(ADC_GetFlagStatus(ADC1,ADC_FLAG_EOC)==RESET);
-
-    return ADC_GetConversionValue(ADC1);
+/**
+ * Init the array with '\0';
+ */
+void badprogInitArray(float *myArray, int size) {
+    int i = 0;
+    while (i < size) {
+        myArray[i] = '\0';
+        ++i;
+    }
 }
 
-int main()
-{
-    GPIO_InitTypeDef GPIO_InitStructure;
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOE, ENABLE);
-    GPIO_StructInit(&GPIO_InitStructure);
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-    GPIO_InitStructure.GPIO_Pin  = LED;
-    GPIO_Init(GPIOE, &GPIO_InitStructure);
-    Configure_ADC();
-    uint32_t led = 0;
+/*******************************************************************************
+ * Main, what else?
+ *******************************************************************************/
+int main(void) {
+    float theArray[ARRAY_SIZE];
+    int i = 0;
 
+    // init with 0 the whole array
+    badprogInitArray(theArray, ARRAY_SIZE);
 
-    while(1)
-      {
-
-    	convertedValue = Read_ADC();//Read the ADC converted value
-    	          //GPIO_SetBits(GPIOE, 1 << led); //turn on a diode
-    	          delay_ms(150); // wait
-    	          //GPIO_ResetBits(GPIOE, 1 << led); //turn off a diode
-    	          uarttransmit(convertedValue);
-    	          if (convertedValue<30)
-    	              {
-    	        	  GPIO_SetBits(GPIOE, GPIO_Pin_8);
-    	              }
-    	      }
+    // our beautiful infinite loop while i < 32
+    while (-2013) {
+        if (i < ARRAY_SIZE) {
+            theArray[i] = badprogADC();
+            badprogDelay(100000);                          // 1 sec
+            ++i;
+        }
+    }
+    return 0;
 }

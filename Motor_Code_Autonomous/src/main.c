@@ -1,7 +1,7 @@
 #include "stm32f30x.h"
 #include "stm32f3_discovery.h"
 #include "math.h"
-
+int min=410,max=2490;
 int uartreceive()
 {
 	int cnt=0;
@@ -472,10 +472,11 @@ void armcode(char link)
 			shut();
 
 }
+
 void servo(void)
 {
-	int min=410,max=2490,angle=0;
 
+		int angle=0;
 		TIM_SetCompare4(TIM2, min);
 		TIM_SetCompare3(TIM2, min);
 			for(int i=min;i<max;i+=2)
@@ -578,16 +579,16 @@ int main(void)
 	UART_Init();
 
 	shut();
-	double angle=400.0,a=20;
-	TIM_SetCompare2(TIM2, 400);
-
+	int angle=min,a=52;
+	TIM_SetCompare2(TIM2, angle);
+	GPIO_ResetBits(GPIOD,GPIO_Pin_2);
 
 	while(1)
 	{
 		if(cnt>200)
 			shut();
 		TIM_SetCompare2(TIM2, (int)angle);
-		uarttransmit(map(angle,410,2490,0,127));
+		//uarttransmit(map(angle,410,2490,0,127));
 		char d=uartreceive();
 		if(d=='m')
 
@@ -621,11 +622,12 @@ int main(void)
 		//	camera(c);
 
 			}
-		else if(d=='s')
+		else if(d=='f')
 				{
-					TIM_SetCompare4(TIM2, 400);
-					TIM_SetCompare3(TIM2, 400);
-					servo();
+					GPIO_SetBits(GPIOD,GPIO_Pin_2);
+					for(int i=0;i<6000;i++)
+						for(int j=0;j<5000;j++);
+					GPIO_ResetBits(GPIOD,GPIO_Pin_2);
 				}
 
 		else if(d==' ')
@@ -635,18 +637,27 @@ int main(void)
 		}
 
 		angle+=a;
+		char send='a';
 
-		if(angle>=2490.0)
+		int points=5;
+		int diff=(max-min)/points;
+		if(angle>=max)
 		{
+			uarttransmit(send+points-1);
 			a=-a;
-
 		}
-		else if(angle<=410)
+		else if(angle<=min)
 		{
+			uarttransmit(send);
 			a=-a;
-
 		}
-
+		else if(angle==min+diff)
+			uarttransmit(send+1);
+		else if(angle==min+2*diff)
+			uarttransmit(send+2);
+		else if(angle==min+3*diff)
+			uarttransmit(send+3);
+		}
 
 	}
-}
+
